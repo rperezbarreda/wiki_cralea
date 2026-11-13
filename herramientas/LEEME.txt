@@ -1,0 +1,1633 @@
+===============================================================
+  WIKI CRALËA — CHULETA DE LAS HERRAMIENTAS
+===============================================================
+
+  Todo se ejecuta DESDE LA CARPETA RAÍZ del repositorio (donde está
+  LEEME.md), no desde dentro de herramientas/:
+
+      python herramientas/3-generadores/generar-mundo.py     <- así
+
+  En Windows, si "python" no le suena, prueba con "py". Casi todas
+  aceptan --probar, que enseña lo que haría sin tocar nada.
+
+
+---------------------------------------------------------------
+  DÓNDE ESTÁ CADA COSA
+---------------------------------------------------------------
+
+  wiki/ ............... LAS FUENTES: las páginas (.md), los mapas
+                        (.cmap), wiki/_imagenes/ (las imágenes
+                        originales, banderas y mapas) y
+                        wiki/_system/templates/ (las plantillas).
+                        Se escribe aquí; lo demás sale de aquí.
+  sitio/ .............. LA WEB. sitio/wiki/ es lo que se publica, tal
+                        cual, en richi.blog/wiki/ (lo copia el blog).
+                        Por eso todas las direcciones empiezan por
+                        /wiki/.
+      sitio/wiki/*.html, carpetas  las páginas (GENERADAS: no se tocan
+                        a mano, salvo index.html, la portada, que
+                        tiene un trozo escrito a mano: ver LA PORTADA)
+      estilos/ scripts/ el CSS y el JS (los originales, comentados:
+                        estos SÍ se tocan)
+      ligero/ y paquete-*  copias sin comentarios y paquetes: los
+                        escribe actualizar-cabeceras.py, no se tocan
+      imagenes/         las imágenes publicadas (las copia
+                        generar-mundo.py desde wiki/_imagenes/)
+      datos/            los JSON: calendario, diccionario,
+                        linea-de-tiempo y mundo-categorias SE
+                        ESCRIBEN (a mano o con su herramienta); los
+                        demás los genera generar-mundo.py
+      fragmentos/       el menú de la wiki (lo escribe
+                        generar-menu-wiki.py) y la ventana Aa
+                        (ajustes.html, a mano)
+      tipografias/      las letras
+  herramientas/ ....... esto.
+
+  UNA CARPETA DE LA WIKI NO PUEDE LLAMARSE como una de las de la web
+  (estilos, scripts, ligero, tipografias, imagenes, datos,
+  fragmentos): se publicaría encima. generar-mundo.py lo avisa.
+
+
+---------------------------------------------------------------
+  VER LA WIKI EN TU ORDENADOR
+---------------------------------------------------------------
+
+      python -m http.server 8000 -d sitio
+
+  y abre http://localhost:8000/wiki/ . Abrir los .html con doble clic
+  no vale: las rutas empiezan por /wiki/ y hace falta un servidor.
+  Se corta con Ctrl+C. Si tocas CSS o JS y ves lo de antes, recarga
+  con Ctrl+Shift+R.
+
+
+---------------------------------------------------------------
+  LAS HERRAMIENTAS
+---------------------------------------------------------------
+
+  1-publicar/ ......... ESCRIBIR
+      nueva-pagina-wiki.py  una página nueva, con la plantilla de su
+                            tipo, en su carpeta
+      linea-de-tiempo.py    los eventos y las eras
+      calendario.py         lo marcado en el calendario de la portada
+      diccionario.py        las palabras de las lenguas del mundo
+  2-imagenes/ ......... IMÁGENES
+      traer-imagen.py       una imagen de tu ordenador, en WebP y a su
+                            tamaño (--para mundo: a wiki/_imagenes/)
+      instalar-ayudas-de-mapas.py  OpenCV y el ampliador con IA (una vez)
+  3-generadores/ ...... PASAR A LA WEB
+      generar-mundo.py      LA WIKI ENTERA: las páginas, los mapas, la
+                            línea de tiempo, las imágenes y los índices.
+                            Detrás pasa solo los de abajo.
+      generar-linea-tiempo.py  solo la línea de tiempo
+      generar-menu-wiki.py  el menú de la wiki (fragmentos/menu-wiki.html)
+      quitar-comentarios.py lo de las plantillas, fuera de lo publicado
+      actualizar-cabeceras.py  el <head> de cada página, el menú dentro,
+                            los ?v= anticaché, ligero/ y los paquetes.
+                            PÁSALO SIEMPRE QUE TOQUES CSS O JS.
+  4-comprobar/ ........ MIRAN, NO TOCAN (pásalas antes de subir)
+      enlaces-rotos.py, css-sano.py, temas-completos.py,
+      nombres-repetidos.py, inyecciones.py
+  5-consulta/
+      pendientes-wiki.py    lo que falta por escribir
+
+  Al terminar cualquier cambio: generar-mundo.py (o, si solo has
+  tocado CSS o JS, actualizar-cabeceras.py) y las cinco de 4-comprobar.
+
+
+---------------------------------------------------------------
+  EL MENÚ DE LA WIKI
+---------------------------------------------------------------
+
+  La wiki va sola, sin el menú del blog: lleva el suyo, la misma barra
+  lateral (se pliega con ☰, en el móvil es un cajón) con lo de la wiki.
+  Lo escribe 3-generadores/generar-menu-wiki.py desde los datos de la
+  wiki, así que no se toca a mano: una sección con su primera página,
+  un mapa nuevo o una utilidad nueva salen solos al pasar la wiki.
+
+      buscar en la wiki     manda a la portada con ?buscar=
+      portada
+      el mundo              cada parte del mundo ("orden" de Mapamundi
+                            en mundo-categorias.json)
+      secciones             las de mundo-categorias.json que tengan
+                            alguna página; abren su ventana en la
+                            portada (#seccion-…)
+      el tiempo             línea de tiempo, calendario y conversor
+      mapas                 el mapamundi y los regionales
+      herramientas          las utilidades y «cómo se escribe esto»
+      ← richi.blog          lo único del blog, abajo y en pequeño
+
+  La página en la que estás sale marcada y con su apartado abierto
+  (aria-current). Un MAPA solo se marca estando en él; una página de un
+  país marca su parte del mundo; una página de una sección (una deidad)
+  marca su sección: la sección lleva en data-marca la carpeta de sus
+  páginas (actualizar-cabeceras.py: barra_para; barra-lateral.js:
+  initializeActivePage).
+
+
+---------------------------------------------------------------
+  LO QUE SIGUE ES LA DOCUMENTACIÓN DE LA WIKI DEL BLOG
+---------------------------------------------------------------
+
+  Copiada de herramientas/LEEME.txt del blog (rperezbarreda/richiblog)
+  con las rutas cambiadas a las de aquí. Donde habla del editor
+  (editor-wiki.py), todavía no está en este repositorio.
+
+
+  EL MUNDO (la wiki)
+
+  sitio/wiki/ es una wiki del mundo donde pasan las partidas: una página
+  por lugar, por persona y por cosa, con su ficha al lado, sus etiquetas
+  y los enlaces entre ellas.
+
+  SE ESCRIBE A MANO. Cada página es un archivo de texto (.md) dentro de
+  wiki/, en la carpeta de su apartado (wiki/lugares/Valderín.md), y el
+  nombre del archivo es el de la página: es como se la enlaza desde
+  otra, [[Valderín]]. LO MÁS FÁCIL, EL EDITOR:
+
+      python herramientas/1-publicar/editor/editor-wiki.py
+
+  (en el menú, Wiki Cralëa → Escribir en la wiki con el editor). Se abre
+  en el navegador: crea una página nueva (con su plantilla, eligiendo de
+  las páginas que ya hay), o una de las que faltan, o sigue con una que
+  ya existe. Cada dato de la ficha es una casilla y cada apartado un
+  recuadro con su nota encima; un botón pone [[enlaces]] donde está el
+  cursor, otro sube una imagen de tu ordenador (a WebP y a su tamaño), y
+  «Guardar y pasar a la web» lo deja publicado y con un enlace para verlo.
+  Solo cambia del .md lo que cambies; las notas <!-- --> se quedan.
+  Y LOS MAPAS (desde el 17-10-2026): poner sitios, pintar regiones,
+  caminos y ríos, o hacerle un mapa nuevo a una página (ver EL EDITOR DE
+  MAPAS, en LOS MAPAS DEL MUNDO).
+
+  O, con preguntas aquí mismo, sin navegador:
+
+      python herramientas/1-publicar/nueva-pagina-wiki.py
+
+  (en el menú, Wiki Cralëa → Escribir una página nueva de la wiki).
+  Pregunta el nombre y QUÉ TIPO DE PÁGINA es, y crea el .md con su
+  PLANTILLA (ver LAS PLANTILLAS DE PÁGINA, justo debajo). Luego se abre
+  con cualquier editor de texto y se escribe. Cómo se escribe
+  cada cosa —negrita, listas, tablas, [[enlaces]], la ficha de la
+  derecha, imágenes, spoilers— está en wiki/Cómo se escribe esto.md, que
+  además sale publicada para verlo de un vistazo.
+
+  LAS PLANTILLAS DE PÁGINA (desde el 15-10-2026). Una por cada tipo de
+  página, sacadas de cómo organizan las suyas las wikis de mundos de
+  fantasía (A Wiki of Ice and Fire, Tolkien Gateway, la de Pathfinder,
+  la de Forgotten Realms): Lugar, Personaje, Raza (y Subraza), Deidad,
+  Religión, Organización, Monstruo, Objeto mágico, Acontecimiento, Era,
+  Astro, Festividad e Idioma, y PAÍS (desde el 18-10-2026): pregunta en
+  qué región está y lo crea en su propia carpeta dentro de la de esa
+  región (# carpeta: junto a {{region}}/{{nombre}}), con la misma ficha
+  que los que ya hay. CADA PAÍS TIENE SU CARPETA (desde el 18-10-2026):
+  wiki/Mapamundi/Azarasia/Reino de Prunia/Reino de Prunia.md (y su
+  .cmap al lado), para ir metiendo dentro sus lugares, su gente o lo que
+  sea. Las regiones (Azarasia, Partaria, los archipiélagos) ya la
+  tenían. En la web, las direcciones cambiaron igual
+  (…/azarasia/reino_de_prunia/reino_de_prunia.html); las viejas llevan
+  a las nuevas (sitio/wiki/scripts/paginas/redirecciones.js). Un país nuevo, igual:
+  su carpeta con su nombre y el .md dentro. CADA TIPO TIENE SU CARPETA en wiki/ (la que dice su
+  «# carpeta:»): Lugares, Personajes, Razas, Religiones, Organizaciones,
+  Monstruos, Objetos mágicos, Historia, Cosmología, Calendario e
+  Idiomas. Desde el 18-10-2026 están todas hechas aunque estén vacías
+  (con un .gitkeep dentro, que el generador no mira, para que git las
+  guarde), y salen así en el editor. Algunas preguntan algo más al crearlas:
+
+    - LUGAR (ciudad, aldea, fortaleza, mazmorra, ruina, templo,
+      paraje…): qué tipo de sitio es, de una lista (o uno nuevo: «Otro»),
+      que es su apartado dentro de «lugares»; y en qué país o zona está.
+      Vale escribir un trozo del nombre («zadir»): busca entre las
+      páginas que hay y deja elegir. Si no está, se queda escrito sin
+      enlace. EL LUGAR SE GUARDA EN LA CARPETA DE ESE PAÍS (# carpeta:
+      junto a {{donde}}): una aldea de Prunia, en wiki/Mapamundi/
+      Azarasia/Reino de Prunia/. Si el país o la zona no tiene página,
+      a wiki/Lugares/.
+    - RAZA: si es una raza (que podrá tener subrazas) o una subraza de
+      una de las que ya hay, de una lista; o de una que aún no existe, y
+      entonces crea también la página de la raza (ver LAS RAZAS, COMO EN
+      D&D, más abajo).
+    - ASTRO: si es un astro, un mundo tributo, una constelación u otra
+      cosa (que se escribe), que es su apartado dentro de «cosmología».
+
+  Cada una trae:
+
+    - la ficha de la derecha con los campos que suele llevar ese tipo
+      (un país: capital, forma de gobierno, gobernante, población,
+      lenguas, moneda, lema…; un personaje: raza, nacimiento, lealtad,
+      familia), repartidos en tramos con su título (Gobierno, Gentes,
+      Familia…);
+    - los apartados de siempre de ese tipo (un país: Historia,
+      Geografía, Gobierno y política, Sociedad, Economía, Cultura,
+      Relaciones exteriores, Lugares de interés, Rumores y leyendas…),
+      cada uno con una NOTA ESCONDIDA que dice qué va ahí. La wiki y las
+      notas de rol son cosas distintas: las plantillas no hablan de
+      partidas (desde el 16-10-2026 ya no llevan «En la mesa» ni el
+      jugador y la clase de los personajes);
+    - las etiquetas para que salga en su sección de la portada (y en su
+      apartado dentro de ella: Deidades, Credos, Asentamientos,
+      Acontecimientos…) y la carpeta donde se guarda (un país, junto a
+      la página de su región).
+
+  LAS RAZAS, COMO EN D&D: cada raza (Elfos) puede tener subrazas (Elfos
+  altos, Drow, Elfos del bosque…), cada una en su página, con la
+  plantilla Subraza. Lo que las une es el campo «subraza de: [[Elfos]]»
+  de la ficha de la subraza (la plantilla lo pone al preguntar de qué
+  raza es). Con eso:
+
+    - la página de la raza lleva sola un apartado «Subrazas» con todas
+      las suyas (nombre y primera frase), detrás de la entradilla o en
+      el apartado «Subrazas» si lo has escrito;
+    - las migas de una subraza pasan por su raza (Wiki Cralëa › Elfos ›
+      Drow);
+    - en la ventana de «razas» de la portada, cada raza es un apartado
+      plegable con la página de la raza primero y sus subrazas detrás
+      («Elfos · 2 subrazas»).
+
+  La raza y sus subrazas se guardan juntas en wiki/Razas/<Raza>/ y
+  llevan la etiqueta de la raza (tags: [Razas, Elfos]). En la lista de
+  la herramienta solo sale «Raza»: la plantilla Subraza está escondida
+  (# oculta: sí) y se llega a ella al decir que es una subraza. Se usa «subraza de» y no
+  «raza» porque «raza» es también un campo de la ficha de un personaje.
+
+  SE PUEDE PUBLICAR A MEDIO RELLENAR: lo que no se ha escrito no sale.
+  Los campos vacíos de la ficha no salen (y si no queda ninguno, no sale
+  la ficha); los apartados sin nada debajo no salen, ni en la página ni
+  en el cuadro de contenido; y las notas escondidas, <!-- así -->, no
+  salen nunca. Las notas valen en cualquier página, no solo en las de
+  plantilla: es para dejarte apuntes que no se publican.
+
+  Están en wiki/_system/templates/, la carpeta donde Chronicler guarda
+  las suyas, que no se publica. Son .md normales: se pueden cambiar, y
+  una que añadas sale sola en la lista. Arriba llevan unas líneas que
+  lee la herramienta y no pasan a la página (# plantilla:, # para:,
+  # orden:, # pregunta …:, # carpeta:), explicadas al principio de
+  herramientas/1-publicar/nueva-pagina-wiki.py.
+
+  LO QUE LAS PÁGINAS SE PONEN SOLAS (desde el 16-10-2026). Sale de las
+  fichas de las demás páginas, así que no hay ninguna lista que mantener
+  a mano (el código, en herramientas/0-comun/mundo_piezas.py):
+
+    - LUGARES de un país o zona: los lugares cuya ficha dice
+      «ubicación: [[ese país]]». PERSONAJES de una raza: los que dicen
+      «raza: [[esa raza]]». QUIÉN VIVE AQUÍ en un lugar: los que dicen
+      «residencia: [[ese lugar]]». Si la página ya tiene un apartado con
+      ese título, la lista va al final de lo que hayas escrito en él.
+    - RELACIONES: los campos «aliados» y «enemigos» de cualquier ficha
+      (países, organizaciones, deidades, personajes), como enlaces:
+      aliados: "[[Una]], [[Otra]]". Basta con que lo diga UNO de los dos:
+      la otra página lo enseña también. Los 107 países llevan los dos
+      campos en «*por decidir*», en el tramo Relaciones de su ficha. Y la
+      página Relaciones (en Utilidades) lo dibuja todo junto: aliados con
+      raya seguida, enemigos a rayas, y debajo la misma lista en una tabla.
+    - LO QUE LA FORMA: el campo «pertenece a: [[La de arriba]]» cuelga
+      una página de otra, y la de arriba enseña el árbol de todo lo que
+      cuelga de ella. Así está hecho EL PANTEÓN (wiki/Religiones/Panteón/):
+      El Panteón de Cralëa › los Arcontes Primordiales (Azaras y Parta),
+      los Heraldos de la Virtud y la Ruina (los doce) y la Mesa del Orden
+      Natural (Elvir, Lusdra, Imedia y Calad), cada uno con su título,
+      sacado del calendario y de la cosmología; sin decir quién es de la
+      Virtud y quién de la Ruina, que eso no estaba escrito. Vale igual
+      para una orden y sus ramas, o una casa y sus vasallos. Las migas
+      siguen el mismo camino.
+    - ÁRBOL FAMILIAR: los campos «padres», «pareja» e «hijos» de los
+      personajes. Sale DIBUJADO como un árbol genealógico de los de
+      siempre: arriba los abuelos (cada pareja sobre su hijo), los padres,
+      la persona con su pareja al lado, y debajo hijos y nietos, cada uno
+      en su caja (con «nacimiento – muerte» si la ficha los tiene) y
+      unidos por rayas; cada caja lleva a su página. Debajo, plegado, lo
+      mismo en lista, con los hermanos. También basta con que lo diga uno.
+    - LA CAJA DE NAVEGACIÓN, al final del artículo: las páginas
+      hermanas. Un país, los de su región (con su bandera en pequeño);
+      una raza o subraza, toda la familia; lo que pertenece a algo, lo que
+      pertenece a lo mismo; un lugar, los de su país; y si no, las de su
+      mismo apartado de la portada (si son entre 2 y 40).
+    - CRONOLOGÍA: lo que ha pasado en esa página o le ha pasado a quien
+      sea, en una raya vertical por fechas. Sale de los eventos de la
+      línea de tiempo que enlazan o nombran la página y de las páginas de
+      acontecimiento cuyo lugar, bandos… la nombran. Un PAÍS se lleva
+      además lo que ha pasado en sus lugares (los que dicen
+      «ubicación: [[ese país]]»): es su línea de tiempo.
+    - EL GLOSARIO, dentro del texto: la primera vez que sale en una
+      página una palabra del diccionario (sitio/wiki/datos/diccionario.json),
+      va subrayada de puntos y al pasar el ratón, llegar con el tabulador
+      o pulsarla, dice qué significa. No se marca dentro de enlaces,
+      títulos, tablas ni código.
+
+    - AVISO DE ESBOZO, arriba del artículo, en las páginas a medias:
+      dice qué les falta (apartados con texto de relleno, la primera
+      frase sin terminar, casi nada escrito o un tercio o más de la ficha
+      «por decidir»). Se va solo cuando ya no les falta nada.
+    - PÁGINAS PARECIDAS, al pie, debajo de la caja de navegación: las
+      que más tienen que ver con esa (se enlazan, enlazan a lo mismo,
+      comparten etiquetas raras o el mismo valor en raza, ubicación,
+      tipo…), sin repetir las de la caja. Hasta seis.
+    - EL MAPA DE SITUACIÓN, PARA PULSAR: al ampliarlo (en la ficha de
+      un país o una región), los países que se ven son enlaces: se pasa
+      el ratón y se resaltan con su BANDERA y su nombre en un globo, como
+      en el mapamundi; se pulsa y se va a su página; debajo, los mismos en
+      una lista, cada uno con su bandera en pequeño. Las formas van en sitio/wiki/datos/situacion/
+      <página>.json (mundo_situacion.para_pulsar, simplificadas).
+
+  LO QUE PONE EL NAVEGADOR (sitio/wiki/scripts/paginas/mundo.js):
+
+    - VISTA PREVIA DE LOS ENLACES: al pasar el ratón (o llegar con el
+      tabulador) por un enlace a otra página de la wiki, una tarjeta con
+      su bandera o su mapa, qué es y su entradilla, de mundo.json. Se
+      cierra con Escape.
+    - FILTROS EN LAS SECCIONES: la ventana de cada sección de la portada
+      (menos el Mapamundi) lleva un desplegable por cada campo que se
+      pueda filtrar y tenga al menos dos valores distintos: raza,
+      ubicación, tipo, hábitat, tamaño, peligrosidad, rareza, lealtad,
+      familia, ámbitos, sede, organización y «qué es» (la lista,
+      FILTRABLES en generar-mundo.py). Lo «por decidir» no cuenta.
+    - CUÁNTO FALTA, en la portada: cuántas páginas tienen ya texto de
+      verdad y cuántos campos de las fichas están decididos, en dos
+      barras (sin contar las Utilidades). Lo cuenta progreso_de,
+      en generar-mundo.py, y va en mundo-portada.json; el detalle, en
+      herramientas/5-consulta/pendientes-wiki.py.
+
+  LAS UTILIDADES (wiki/Utilidades/, en la sección «herramientas» de la
+  portada). Son páginas normales de la wiki con una PIEZA dentro, una
+  línea suelta como <div class="pieza-conversor"></div>, que el
+  generador cambia por lo que es. Se pueden poner también en cualquier
+  otra página:
+
+    pieza-conversor    el CONVERSOR DE FECHAS: un año (AEM o DEM), un mes
+                       y un día del Ciclo, y dice qué día de la semana es,
+                       en qué era cae, la fase de la luna, qué se celebra
+                       y cuánto ha pasado o falta desde hoy en Cralëa (con
+                       el «hoy» del calendario, si lo has fijado, al día).
+                       Las eras salen de la línea de tiempo, en
+                       sitio/wiki/datos/conversor.json, que escribe el generador.
+    pieza-nombres      el GENERADOR DE NOMBRES: aprende cómo suenan los
+                       nombres de cada región (sus países), de los dioses,
+                       de cada idioma del diccionario y de cada raza (sus
+                       personajes), y se inventa otros que no existen. Los
+                       ejemplos, en sitio/wiki/datos/nombres.json (lo escribe el
+                       generador, quitando «Reino de», «Tribu»… y las
+                       palabras normales). Para añadir los tuyos o un
+                       estilo nuevo: sitio/wiki/datos/nombres-propios.json, con
+                       {"estilos": [{"nombre": "Elfos", "ejemplos": [...]}]}
+                       (cuatro ejemplos como poco).
+    pieza-diccionario  el DICCIONARIO: todas las palabras, con un buscador.
+                       Las palabras están en sitio/wiki/datos/diccionario.json y
+                       se llevan con herramientas/1-publicar/diccionario.py.
+                       Están las cinco palabras nithir que ya salían
+                       (Lunaah, Söh-hgol, Nevadra, Lurmeri, Gomath). Una
+                       página de idioma (infobox «Idioma») enseña sola sus
+                       palabras en «Vocabulario».
+    pieza-relaciones   el diagrama de relaciones (ver arriba).
+    pieza-panteon      todos los árboles de «pertenece a» juntos.
+
+  LOS ECLIPSES: cada 85 días hay uno, de cada uno de los cuatro tipos
+  por turno (total, parcial, anular e híbrido), así que caen cuatro al
+  año y siempre los mismos días: el 1 del Mes de Astucia, el 2 del Mes
+  del Arcano, el 3 del Mes de Cadena y el Día del Cambio. Está en
+  «luna» → «ciclo_de_eclipses» del calendario (cada, primero y los
+  tipos con su efecto, que se puede cambiar: el orden de los tipos y lo
+  que hace cada uno con la magia son una propuesta a partir de la
+  cosmología). Salen en el calendario de la portada y en el conversor.
+
+  LAS MIGAS de una entrada (Wiki Cralëa › Mapamundi › Azarasia) se
+  quedan pegadas arriba del marco al bajar, para volver atrás sin subir
+  (prepararMigasFijasMundo, en sitio/wiki/scripts/paginas/mundo.js; con fixed, no
+  sticky).
+
+  EL DICCIONARIO se puede filtrar por idioma además de buscar, y la
+  palabra va más grande que lo demás de la fila.
+
+  LA LUNA EN EL CALENDARIO. En sitio/wiki/datos/calendario.json, «luna»: sus
+  fases, el día de cada mes en que caen (el ciclo es de 28 días, como el
+  mes: luna nueva el 1, cuarto creciente el 8, llena el 15, menguante el
+  22, que es una suposición y se cambia ahí) con su icono y, si quieres,
+  su «efecto»; y sus «eclipses» ({"mes", "dia", "nombre", "anyo"}). En la
+  portada sale el icono en la esquina del día y la fase en el globo; un
+  eclipse sin año sale como una cosa más del calendario (todos los
+  años), con el efecto de la cosmología, y uno con año lo ve el
+  conversor de fechas.
+
+  LO QUE FALTA, de un vistazo:
+
+      python herramientas/5-consulta/pendientes-wiki.py          (--todo, con todo)
+
+  (en el menú, Wiki Cralëa → Ver lo que falta en la wiki). No cambia
+  nada: cuenta las páginas que se enlazan y no existen, los campos «por
+  decidir» (por campo), las páginas con texto de relleno, las
+  entradillas que se quedaron como las dejó la plantilla y las imágenes
+  que pide una ficha y no están.
+
+  LAS IMÁGENES de la wiki van en wiki/_imagenes/ y se nombran por el
+  nombre del archivo. generar-mundo.py solo publica las que use alguna
+  página, y las copia a sitio/wiki/imagenes/.
+
+  EL MAPA sigue siendo el .cmap de Chronicler (wiki/Mapamundi de
+  Cralëa.cmap, con las regiones y sus fronteras) y su imagen de fondo,
+  wiki/_imagenes/mapamundi_fronteras.webp (el nombre que pide el .cmap).
+  Para cambiarlo: se sustituye el .cmap (o la imagen) y se pasa la wiki
+  a la web. La imagen de fondo, a 2560 px de ancho como mucho: el mapa
+  nunca se pinta más grande, y el original de 7680 pesaba 55 MB.
+  (Desde el 22-10-2026, si la original es bastante más grande —un
+  mapamundi ampliado con IA en el editor—, se hace además una versión
+  MÁXIMA, hasta 8192 de lado, «-max.webp», que el mapa pide solo al
+  acercarse mucho: la de 1280 al entrar, la de 2560 al acercar y la
+  máxima desde el 400% más o menos.)
+
+  ANTES VENÍA DE CHRONICLER, entera, con herramientas/1-publicar/
+  importar-mundo.py, que se traía la bóveda y dejaba elegir qué entraba.
+  Ya no está en el menú; el archivo sigue ahí por si un día vuelve a
+  hacer falta. Lo que eligió dejar fuera sigue en
+  herramientas/0-comun/datos/wiki-fuera.txt (una ruta por línea, desde wiki/; si acaba
+  en «/», la carpeta entera), y generar-mundo.py lo sigue respetando: lo
+  que esté ahí no se publica. nueva-pagina-wiki.py quita de esa lista la
+  página que crea, si estaba.
+
+  Para pasarlo a la web:
+
+      python herramientas/3-generadores/generar-mundo.py
+
+  Eso lee los .md de wiki/, escribe una página HTML por cada uno en
+  sitio/wiki/, copia las imágenes a sitio/wiki/imagenes/ y deja el índice en
+  sitio/wiki/datos/mundo.json (que es de donde sale la portada). Detrás hay que
+  pasar los de siempre, porque hay páginas nuevas: el sitemap, el mapa,
+  el buscador y las cabeceras. En el menú, «Repasar y subir → Volver a
+  generar…» los pasa todos.
+
+  CON --probar NO ESCRIBE NADA y cuenta lo que haría. Conviene pasarlo
+  así la primera vez y cada vez que se toque mucho:
+
+      python herramientas/3-generadores/generar-mundo.py --probar
+
+  AL TERMINAR DICE CUATRO COSAS, y las cuatro sirven:
+    · qué páginas están enlazadas pero no escritas todavía (los
+      "enlaces rojos"), que es la lista de lo siguiente que hacer;
+    · a qué páginas no enlaza ninguna otra, que solo se encuentran
+      buscándolas;
+    · qué imágenes pesan demasiado;
+    · y QUÉ NO HA SABIDO CONVERTIR. Eso último es lo importante: el
+      conversor no adivina. Lo que no entiende lo deja como está y lo
+      canta, con el nombre de la página. Si no sale ningún aviso, lo
+      que hay en la web es lo que hay en la bóveda.
+
+  LO QUE ENTIENDE está escrito en wiki/LEEME.txt, que es donde se va a
+  mirar estando dentro. En corto: el frontmatter entero (incluido el
+  "layout" de la infobox), el Markdown de siempre, los wikilinks en sus
+  cuatro formas, las imágenes ![[así]], los spoilers ||así||, las
+  inserciones {{insert: Página}} y el HTML de las galerías.
+
+  POR QUÉ ESTÁ ESCRITO A MANO. El conversor son tres archivos
+  (mundo_formato.py, que lee el formato de las páginas; mundo_mapas.py,
+  que lee el de los mapas; y generar-mundo.py, que arma las páginas) y
+  no usa ninguna librería, por lo mismo que el resto del sitio: aquí no
+  hay dependencias. Entiende el trozo de Markdown y de YAML que usa
+  Chronicler, que está documentado y es acotado, y de lo demás avisa en
+  vez de inventárselo.
+
+
+  LOS MAPAS DEL MUNDO
+
+  Un mapa interactivo de Chronicler es un archivo .cmap de la bóveda
+  —un JSON con el tamaño del lienzo, las capas de fondo y el contorno
+  de cada región— y sale como una página más:
+
+      wiki/Mapamundi de Cralëa.cmap
+      sitio/wiki/mapa_mapamundi_de_cralea.html
+
+  SE PINTA EN SVG DENTRO DE LA PROPIA PÁGINA. Ni canvas ni librería de
+  mapas: así cada región es un enlace de verdad, el mapa se ve sin
+  JavaScript, se imprime y pesa lo que pesa el dibujo y nada más. Lo
+  único que pone el JavaScript es el zoom, el arrastre, el globo y
+  encender y apagar cosas; sin él, el mapa se ve entero y los mandos no
+  se pintan.
+
+  EL ZOOM VA CON LA RUEDA DEL RATÓN, y hacia donde esté el puntero: lo
+  que estás mirando se queda donde está. Con el mapa entero (100%) la
+  rueda hacia abajo mueve la PÁGINA, como en cualquier otro sitio, que
+  una rueda secuestrada dentro de un texto es de lo que más molesta; y
+  con mayúsculas pulsada mueve el mapa de lado. Los botones de + y − van
+  por saltos (100, 150, 200, 300, 400, 600%) y la rueda va suave entre
+  los mismos topes.
+
+  LAS REGIONES SE PUEDEN APAGAR, con el interruptor de «regiones». Un
+  mapa dibujado a mano ya trae sus fronteras pintadas, así que las
+  manchas de color por encima tapan justo lo que quieres mirar; apagarlas
+  deja la imagen limpia y los sitios se siguen pulsando desde la lista.
+  Los pines no se apagan: ésos no tapan nada.
+
+  AL PASAR POR ENCIMA DE UN SITIO sale un globo con su nombre y con a
+  dónde lleva. Es HTML y no el globo del navegador (el <title> del SVG):
+  ése tarda un segundo, sale con la tipografía del sistema y no cabe más
+  que una línea. Cuando hay JavaScript se quitan los <title> —para que no
+  salgan los dos— y cuando no lo hay se quedan, que es mejor que nada.
+
+  LOS PINES son las chinchetas de Chronicler: su color, su emoji y a
+  dónde llevan. Uno marcado como invisible en la aplicación no se
+  publica, y se dice al terminar cuántos eran. También se pueden apagar
+  en el mapa, con el interruptor de «pines».
+
+  UN PIN MIDE SIEMPRE LO MISMO EN PANTALLA (15 px de radio), lo mire
+  quien lo mire y con el zoom que sea. En el SVG está dibujado en
+  unidades del mapa, así que el zoom lo engordaba con todo lo demás y al
+  600% tapaba medio continente; mundo-mapa.js le pone un "scale" que
+  contrarresta el zoom. Un pin no es geografía, es un señalador.
+
+  LOS TIPOS DE SITIO (desde el 17-10-2026): un pin puede ser CAPITAL (★,
+  dorado), CIUDAD (◉), PUEBLO (●), FORTALEZA (♜, cuadrada) o RUINA (✕,
+  con el borde a trazos). Cada uno con su símbolo y su forma, no solo su
+  color, y encima de la lista sale la leyenda con los que hay en ese
+  mapa. Lo dibuja mundo_mapas._simbolo_de_pin. Y además (desde el mismo
+  día, más tarde) PUERTO ⚓, TEMPLO ⛩, TORRE ♖, CUEVA ⌓, MINA ⛏, PUENTE ⌒,
+  CAMPO DE BATALLA ⚔, MAZMORRA ☠ y CAMPAMENTO ⛺: una bola clara con el
+  símbolo escrito dentro, con las fuentes de símbolos que trae cualquier
+  sistema (Segoe UI Symbol en Windows) y un U+FE0E detrás para que no
+  salga como emoji de colores. Un sitio con tipo y con color propio lleva
+  el color en un style="" para ganarle al del tipo.
+
+  LOS NOMBRES DE LOS SITIOS SE LEEN EN EL MAPA, escritos al lado de cada
+  uno con un borde oscuro alrededor de las letras. Van dentro del pin, así
+  que miden siempre lo mismo en pantalla. Los de las capitales, las
+  ciudades y los pines sin tipo, siempre; los demás (pueblos, ruinas…)
+  solo de cerca, al 200% o más (mundo-mapa.js pone esta-cerca en el
+  lienzo): con todos escritos, el mapa entero era una sopa. Se apagan con
+  el interruptor de «nombres» (que apaga también los textos sueltos).
+
+  LOS CAMINOS Y LOS RÍOS: rayas abiertas, debajo de los pines. El río
+  azul y seguido, el camino claro y a trazos con un borde oscuro; se
+  distinguen por la forma de la raya. Miden lo mismo en pantalla a
+  cualquier zoom (vector-effect: non-scaling-stroke: en un mapa visto
+  entero, las rayas del grosor del mapa salían de un píxel). Con nombre
+  salen en la lista y, si llevan a una página, se pulsan. Se apagan con
+  el interruptor de «caminos y ríos».
+
+  CAMINO PRINCIPAL Y SENDERO: el camino principal, seguido y gordo con
+  borde oscuro; el sendero, fino y a trazos cortos.
+
+  MÁS RAYAS: FRONTERA (granate a raya y punto, con un borde claro), RUTA
+  MARÍTIMA (a puntos claros), MURALLA (gris, gorda y con borde) y RUTA DE
+  VIAJE (rosa a trazos, con FLECHAS hacia donde va: del primer punto al
+  último). Las flechas son como los pines: llevan data-mapa-xy y su giro
+  en data-mapa-giro, y mundo-mapa.js les pone el scale para que midan lo
+  mismo a cualquier zoom (por eso el radio de pin va también en el <svg>).
+
+  LOS RÍOS SE ENSANCHAN hacia el final (la desembocadura): se pintan en
+  ocho trozos seguidos, de 2 a 7,5 píxeles de pantalla, cada uno con su
+  grosor en un style="" (mundo_mapas._rio_que_se_ensancha). Por eso un río
+  se dibuja desde donde nace. Uno que no deba ensancharse lleva "taper":
+  false (en el editor, la casilla «Se ensancha hacia el final»).
+
+  LOS TEXTOS SUELTOS («Mar de las Brumas», «Montes Grises»): escritos en
+  el mapa, con su LETRA (antigua, elegante, muy legible, moderna, a mano,
+  de videojuego o de máquina: las fuentes que ya carga la web, más
+  Georgia y Palatino, que son del sistema; clases es-letra-… en
+  mundo-mapa.css), en cursiva o no, con su TAMAÑO en píxeles del mapa
+  ("fontSize"; los de antes llevaban "size": grande, mediano o pequeño)
+  y su giro. Son del
+  mapa, no señaladores: crecen con el zoom. No se pulsan ni salen en la
+  lista (son el dibujo).
+
+  LA ESCALA: con "scale" en el .cmap (la pone el editor), el mapa lleva
+  abajo a la izquierda de su ventana UNA BARRA DE ESCALA COMO LA DE UN
+  MAPA DE PAPEL: a tramos blancos y negros, con sus rayitas (largas en el
+  0, la mitad y el final; cortas en los cuartos), sus números y la
+  unidad. La pinta mundo-mapa.js y se queda quieta aunque el mapa se
+  mueva; con el zoom se rehace para medir siempre un número redondo (1, 2
+  o 5 por diez a la lo que sea) de unos 180 píxeles. El SVG trae la
+  escala en data-mapa-escala-px, -distancia y -unidad, y los días de
+  viaje en data-mapa-viaje. Sin JavaScript se ve la del propio SVG (un
+  sexto del mapa, que crece con el zoom). La leyenda lo dice en letra.
+
+  MEDIR EN LA WEB: los mapas con escala llevan el botón «medir». Con él
+  pulsado, cada clic pone un punto (encima de un sitio también, que
+  entonces no lleva a su página) y encima del mapa, abajo, sale cuánto
+  hay y los días de viaje a pie y a caballo; «borrar la medida» empieza
+  otra y Esc deja de medir. Lo medido va encima del mapa y no en la fila
+  de los mandos: ahí la fila crecía y el mapa bajaba mientras se pulsaba.
+
+  LOS SITIOS COMO EMBLEMA: un sitio (con su tipo: capital, pueblo…) puede
+  verse como un escudo, una bandera o un medallón, de tres tamaños, con
+  una imagen dentro (una bandera, un blasón) o, sin ella, con el símbolo
+  de su tipo en el color de su tipo; marco dorado y el nombre debajo. Va
+  en el propio pin: "shape", "size" e "image". Miden lo mismo en pantalla
+  a cualquier zoom, se apagan con los pines, llevan a su página, salen en
+  la lista y en la leyenda (por su tipo). Las imágenes se copian a
+  sitio/wiki/imagenes/ como las de las fichas (generar-mundo: EMBLEMAS_USADOS).
+  Los «emblems» sueltos de antes (17-10-2026) se leen igual, como sitios
+  sin tipo; el editor los pasa a sitios al abrir el mapa (con el tipo por
+  el tamaño: grande, capital; mediano, ciudad; pequeño, pueblo).
+
+  CADA TIPO DE SITIO CON SU FORMA, no solo con su color (FORMA_POR_TIPO
+  en mundo_mapas.py y en mapas.js): pueblo, círculo; ciudad, hexágono;
+  fortaleza, cuadrado; ruina, rombo; puerto, octógono; templo, casa;
+  torre, torre; cueva, cúpula; mina, triángulo hacia abajo; puente,
+  píldora; batalla, estrella; mazmorra, cruz; campamento, triángulo; la
+  capital, escudo. Los sitios con su símbolo usan esa forma para su bola
+  (la capital sigue con su estrella, la fortaleza con su torre y la ruina
+  con su aspa). Como emblema, "shape": "tipo" («con la forma de su tipo»)
+  toma la de su tipo; y hay más formas para elegir a mano: cuadrado,
+  rombo, hexágono, octógono, triángulo (y hacia abajo), casa, torre,
+  cúpula, píldora, estrella y cruz, además de escudo, bandera y medallón.
+  En el Reino de Prunia los sitios que iban de medallón pasaron a «la
+  forma de su tipo» (17-10-2026).
+
+  LA LEYENDA DIBUJA CADA TIPO COMO SE VE EN ESE MAPA (_marca_de_leyenda):
+  un SVG pequeño con las mismas clases que en el mapa; si los sitios de
+  ese tipo van como emblema, el emblema con la imagen del primero que la
+  tenga, así que la capital sale con su bandera.
+
+  UN SITIO SIN NOMBRE SE LLAMA COMO SU TIPO: «Puente», y no «sin nombre»,
+  en la lista, en el globo y en la lista del editor.
+
+  LA CAPITAL, SIEMPRE CON SU BANDERA: en el editor, al poner una capital
+  (o cambiar un sitio a capital) sin imagen, se vuelve emblema (escudo,
+  grande, si no tenía forma) con la bandera, el blasón o el escudo de la
+  ficha de la página del mapa (o, si no la tiene, de la página a la que
+  lleva). Lo dice en la barra de abajo; se puede cambiar después.
+
+  CLASES DE ZONA (shapes[].kind): país vecino, provincia o comarca, lago,
+  mar, bosque, montaña, desierto, pantano o ciénaga y valle o llanura
+  (TIPOS_DE_ZONA en mundo_mapas.py y en mapas.js). Cada una con su color
+  si la zona no trae uno, lo tapada que va (el agua más; las provincias
+  casi nada) y SU TRAMA encima del color (mundo_mapas._trama, un
+  <pattern> en <defs>): rayado los vecinos, olas el agua, arbolitos el
+  bosque, montes la montaña, puntitos el desierto, juncos el pantano,
+  hierba el valle. Vecinos y provincias, con la raya a trazos. Salen en
+  la leyenda (su color con su trama) y en la lista y el globo («lago»,
+  «país vecino»…). En el editor: «Qué zona» al pintar una región, y «Qué
+  es» en lo elegido. En el Reino de Prunia se pusieron por el nombre
+  (17-10-2026): Lago…, lago; Bosque…, bosque; Cordillera, montaña;
+  Ciénaga, pantano; Valle, valle; los países de al lado, vecinos.
+
+  TEXTOS SOBRE UNA CURVA (labels[].points): el nombre de un río o de una
+  cordillera escrito a lo largo de unos puntos, suavizados (Catmull-Rom:
+  _curva_suave y curvaSuaveMapa) y del derecho aunque se marquen de
+  derecha a izquierda. En la web, un <textPath> centrado. En el editor:
+  «Escribir» con «Sobre una curva» (se marca punto a punto, como una
+  raya, y luego se escribe), o «Ponerlo sobre una curva» / «Quitar la
+  curva» en un texto elegido; la curva se retoca por sus puntos y el
+  texto se arrastra entero. Su x, y es el punto de en medio de la curva.
+
+  LA ROSA DE LOS VIENTOS ("compass": "arriba-derecha"…, en «El mapa en
+  sí» del editor): ocho puntas en pergamino y oro, aro dorado y N, E, S
+  y O (mundo_mapas._rosa y rosaDeLosVientos en mapas.js, las mismas
+  piezas). Va dentro del dibujo, del tamaño del mapa, y sale también en
+  la imagen descargada. En Prunia, arriba a la derecha.
+
+  LA INTERFAZ DEL MAPA, COMO UN MAPA DE LOS DE SIEMPRE (desde el
+  22-10-2026; antes los mandos iban en una columna a la izquierda):
+  con JavaScript (prepararInterfazDeMapa, pone con-interfaz en la caja):
+    - ARRIBA A LA IZQUIERDA, el BUSCADOR «Buscar en el mapa»: se escribe
+      un trozo y sale la lista de sitios, regiones y rayas con nombre (un
+      <datalist>); al elegir uno el mapa se acerca, lo pone en medio y lo
+      resalta un momento (lo regional del mapamundi, con el zoom al que
+      sale). A su lado, el botón redondo de la RUTA. Debajo, las
+      PASTILLAS: capas, leyenda, medir (y «borrar la medida» mientras se
+      mide).
+    - ABAJO A LA DERECHA, el ZOOM en columna, en botones redondos:
+      pantalla completa, ver entero, +, el tanto por ciento y −.
+    - LOS PANELES (capas: qué se ve, los sitios y las zonas; ruta;
+      leyenda) son tarjetas que abre su pastilla, se cierran con su × o
+      Esc (el foco vuelve a la pastilla) y SE MUEVEN arrastrando su
+      cabecera, o con las flechas desde su asa ⠿ (Mayús: más deprisa). Se
+      recuerda dónde se dejó cada uno (localStorage «mapa-paneles») y
+      nunca se salen del mapa. La cabecera se queda; lo de dentro se
+      desplaza.
+    - EN UNA PANTALLA ESTRECHA (menos de 700px, sin pantalla completa:
+      es-estrecha) el mapa mide poco de alto: el buscador, las pastillas,
+      los paneles y el zoom van encima del mapa, en su sitio, y no se
+      arrastran.
+  Tarjetas redondeadas y con sombra, con los colores del tema (sirve en
+  los diez). Sin sticky, sin grid, sin color-mix: absolute y flex.
+
+  LOS SITIOS, CÓMO Y CUÁLES: en los mandos, el grupo «sitios»: con su
+  símbolo y su nombre, solo el símbolo o solo el nombre; el desplegable
+  «tipos de sitio», una casilla por tipo con cuántos hay; y el atajo
+  «SOLO PAÍSES Y CAPITALES» (deja «ver: países» y solo las capitales; al
+  pulsarlo otra vez, todo). Lo hacen clases (pines-solo-simbolo y
+  pines-solo-nombre en el lienzo, es-filtrada en cada pin;
+  prepararFiltrosDeSitiosDeMapa). La casilla «textos» de «ver» es solo
+  para los textos sueltos (mares, cordilleras): los nombres de los
+  sitios van en «sitios».
+
+  LAS ZONAS, UNA A UNA O POR CLASES: el desplegable «zonas» del menú
+  (un <details>, lo llena prepararZonasDeMapa) tiene una casilla por
+  clase (países vecinos, lagos, bosques… y «otras regiones») y debajo
+  una por cada zona con nombre. Apagar la clase apaga todas, también las
+  de sin nombre; si unas sí y otras no, la de la clase sale a medias.
+  Cada zona lleva data-mapa-zona con su clase.
+
+  LA ROSA DE LOS VIENTOS SE APAGA con su casilla en «ver».
+
+  EL MAPA SE PUEDE LLEVAR MÁS ALLÁ DE SUS BORDES: el dibujo lleva un
+  margen de un tercio de la ventana por cada lado (margenDeMapa;
+  ponerZoomDeMapa lo descuenta para que el zoom siga yendo hacia el
+  ratón), así un sitio de la orilla se puede poner en medio. TAMBIÉN AL
+  100% con ratón (pointer: fine): sale entero y centrado (centrarMapa) y
+  se arrastra; «ajustar» lo vuelve a centrar. La ventana mide lo que el
+  dibujo al 100% (más las barras) y no cambia de alto con el zoom. En
+  pantallas táctiles, al 100% no hay margen: el dedo mueve la página.
+
+  UN SITIO SIN NOMBRE se llama como su tipo y ya no repite el tipo al
+  lado («Puente», no «Puente · puente»).
+
+  LA RUTA POR LOS CAMINOS (botón «ruta» de la vista del mapa): el
+  generador hace un grafo con los caminos, senderos y rutas
+  (_red_de_caminos: los puntos casi juntos son el mismo cruce, un camino
+  que acaba a menos de medio pin de otro se engancha a él, y cada sitio
+  con nombre se engancha al camino que le pase cerca) y lo deja en
+  data-mapa-red. mundo-mapa.js (prepararRutaDeMapa): el botón la
+  enciende y la apaga (apagada, el panel se cierra y la ruta pintada se
+  esconde, sin perderse); encendida, abre en el menú, debajo del botón,
+  un panel con DESDE y HASTA, que son BUSCADORES (se escribe un trozo y
+  sale la lista de sitios que coinciden: un <datalist>). O se pulsan dos
+  puntos en el mapa: un sitio, o CUALQUIER PUNTO, que se engancha al
+  TRAMO de camino más cercano (al punto del tramo, no a su esquina; se
+  sigue por la punta que dé la ruta más corta) («un punto del mapa (cerca
+  de Pozovalor)»; lo de campo a través va a puntos y se suma a la
+  distancia, que lo dice aparte). LA REGLA DEL CAMPO A TRAVÉS: si de un
+  punto suelto al camino más cercano hay MÁS que de un punto al otro, no
+  se pilla ningún camino: EN LÍNEA RECTA, a puntos. Si no, siempre por
+  los caminos, aunque salga algo más largo. Un arrastre del mapa no
+  cuenta como pulsar. Luego
+  busca el camino más corto (Dijkstra) y lo pinta en rojo con borde
+  oscuro; dice cuánto hay, los días a pie y a caballo y por qué sitios
+  se pasa. «Al revés», «quitar la ruta», Esc lo cierra. Encender la ruta
+  apaga «medir» (y al revés). Si un sitio no sale en
+  las listas es que no tiene un camino cerca: hay que llevárselo con el
+  imán.
+
+  CAMINOS, RÍOS Y OTRAS RAYAS SE APAGAN POR SEPARADO: cada grupo va en su
+  <g class="mapa-lineas es-caminos|es-rios|es-otras"> con su casilla en los
+  mandos (GRUPO_DE_RAYA en mundo_mapas.py). En el editor, la lista de lo
+  que hay también los separa.
+
+  EL ESTILO DE CADA RAYA: además del color, cada raya puede llevar su
+  grosor ("width", en píxeles de pantalla), su tipo de trazo ("dash":
+  continua, a trazos, a puntos o raya y punto) y su separación ("gap").
+  Van en un style="" (mundo_mapas._estilo_de_raya) para ganarle a la hoja
+  de estilos; un río con grosor propio se ensancha de su 45% a su 160%, y
+  uno a trazos o a puntos no se ensancha. En el editor: «Estilo de la
+  raya», en lo elegido.
+
+  EN LA VISTA DEL MAPA NO SE SELECCIONA EL TEXTO (user-select: none en la
+  caja del mapa): al pulsar y arrastrar se quedaba todo marcado.
+
+  LAS MIGAS SE QUEDAN ARRIBA al bajar por la página del mapa: cuando su
+  sitio se sale, mundo-mapa.js (fijarMigasDeMapa) las pasa a position:
+  fixed en lo alto de la caja que se desplaza, de lado a lado, y deja un
+  hueco de su alto para que nada salte.
+
+  LA LEYENDA FLOTANTE: el botón «leyenda» de los mandos abre un panel
+  encima del mapa, arriba a la derecha (Esc lo cierra). Sin JavaScript va
+  debajo del mapa, dentro de su marco.
+
+  LAS MIGAS DEL MAPA: la página de un mapa de una página lleva las migas
+  de esa página y «Mapa» al final (Wiki Cralëa › Mapamundi › Azarasia ›
+  Reino de Prunia › Mapa), y abajo «volver a» esa página. El mapamundi,
+  Wiki Cralëa › su título.
+
+  EN LA PORTADA DE LA WIKI solo salen los mapas que no son de ninguna
+  página (el mapamundi). A los de una página se llega desde ella: el botón
+  «Explorar Mapa» va en su ficha de la derecha, centrado debajo de la bandera (el
+  hueco lo deja poner_emblemas con MARCA_SU_MAPA); si la página no tiene
+  ficha, arriba del artículo.
+
+  ZONAS DENTRO DE ZONAS: las regiones se pintan DE LA MÁS GRANDE A LA MÁS
+  PEQUEÑA (en la web, en el editor y en la imagen descargada), así que
+  una zona dentro de otra queda encima: se ve y se puede pulsar. Antes
+  iban en el orden del archivo y una grande dibujada después se tragaba
+  a las de dentro. En el mapa de una página ("page"), cuando hay zonas
+  dentro de otras, los mandos dicen «todas las zonas» (de salida), «solo
+  las grandes», «solo las de dentro» o «solo la imagen». En el
+  mapamundi siguen siendo «países» (de salida), «regiones», «las dos» y
+  «solo la imagen». Qué zona está dentro de cuál lo dicen las páginas
+  de la wiki («región: [[…]]»), pero solo si hablan de alguna zona de
+  ese mapa; si no, se mira el dibujo.
+
+  LO QUE LE AÑADE ESTA WEB AL .cmap (Chronicler no lo conoce; si abres
+  el mapa allí y lo guardas, puede perderlo): "page" (de qué página es
+  el mapa), pins[].kind (el tipo de sitio), "lines" (las rayas, con su
+  "taper"), "labels" (los textos sueltos) y "scale" (la escala y los días
+  de viaje). Está explicado, con un ejemplo, arriba del todo de
+  mundo_mapas.py.
+
+  EL MAPA DE UNA PÁGINA. Un .cmap con "page" es de esa página: se guarda
+  en su carpeta con el mismo nombre (wiki/Mapamundi/Azarasia/Reino de
+  Prunia/Reino de Prunia.cmap junto a Reino de Prunia.md; no se pisan,
+  uno es .md y otro .cmap), sale en la web como
+  …/reino_de_prunia/mapa_reino_de_prunia.html y la página
+  lleva arriba un botón, «Explorar el mapa del Reino de Prunia». El
+  primero, el de Prunia, es el recorte ampliado del mapamundi
+  (wiki/_imagenes/mapas/reino_de_prunia_mapa.webp, de 1920 px). Si hay
+  una imagen mejor con EL MISMO ENCUADRE, se cambia desde el editor y
+  todo lo puesto se queda en su sitio.
+
+  EL EDITOR DE MAPAS está en el editor de la wiki (editor-wiki.py →
+  «Mapas», o el botón «Editar su mapa» / «Hacerle un mapa» de cada
+  página). Los mapas salen POR CARPETAS, como están en wiki/, y lo que
+  hay dentro de cada uno también (desde el 22-10-2026): Sitios (y dentro,
+  cada tipo: Capital, Ciudad, Pueblo…), Emblemas, Caminos, Ríos, Otras
+  rayas, Textos y Regiones (cada tipo de zona). Cerradas de salida; se
+  acuerda de las que abres, y la de lo que eliges en el mapa se abre
+  sola. Lo que se puede hacer:
+
+    - PONER UN SITIO: se elige qué es (capital, ciudad…) y se pulsa en
+      el mapa. Luego, en «Lo elegido», su nombre y la página a la que lleva.
+    - PINTAR UNA REGIÓN, O UNA RAYA (camino, río, frontera, ruta
+      marítima, muralla o ruta de viaje, en «Qué raya»): punto a punto
+      (pulsando; la región se cierra pulsando en el primero, y todo se
+      acaba con doble clic o «Terminar el dibujo») o A MANO ALZADA,
+      arrastrando (se le quitan los puntos de más al soltar, como hace el
+      generador). Las rayas van del primer punto al último: el río desde
+      donde nace, la ruta desde donde sale. El primer punto de una raya
+      elegida sale en amarillo.
+    - PONER UN SITIO: qué sitio es (capital, pueblo…) y CÓMO SE VE: con
+      su símbolo, con la forma de su tipo, o como escudo, bandera,
+      medallón, hexágono, rombo, estrella… (con su tamaño). Como
+      emblema, en «Lo elegido» se le pone imagen: SUBIR UNA de tu ordenador
+      (va a wiki/_imagenes/banderas/, a 512 px como mucho), escribir o
+      elegir una de las que ya hay, o «USAR LA DE SU PÁGINA», que pone la
+      bandera, el blasón o el escudo de la ficha de esa página. Sin
+      imagen lleva el símbolo de su tipo.
+    - ESCRIBIR EN EL MAPA: arriba se eligen la letra, el tamaño y si va en
+      cursiva; se pulsa donde va el texto y, en «Lo elegido», se escribe (y
+      se le puede cambiar todo eso, el giro y el color). Con «Sobre una
+      curva», se marca la curva punto a punto (ver TEXTOS SOBRE UNA CURVA).
+    - PINTAR UNA REGIÓN: «Qué zona» (vecino, lago, bosque…; ver CLASES DE
+      ZONA) le da su trama y su color.
+    - EL COLOR DE LO NUEVO: al cambiarle el color a algo, lo siguiente
+      que se ponga de esa clase (sitio, raya, región o texto) sale de ese
+      color. La paleta lo dice («Sale de este color») con un botón «Como
+      su tipo» para olvidarlo. Se guarda en el navegador
+      (localStorage «mapa-color-nuevo»).
+    - ELEGIR VARIAS COSAS: Mayús+clic (en el mapa o en la lista) añade o
+      quita; Mayús y arrastrar en un hueco elige lo que quede dentro del
+      recuadro (los sitios y los textos por su punto; las rayas y las
+      regiones, si caben enteras). Varias se arrastran juntas, se mueven
+      con las flechas, se borran con Supr y, en «Lo elegido», se les cambia
+      a la vez el tipo de sitio, la forma, el tamaño, la raya, la zona o
+      el color. Ctrl+C, Ctrl+V y Ctrl+D copian, pegan y duplican lo
+      elegido (sea una o varias), un poco más abajo a la derecha y ya
+      elegido para moverlo.
+    - A PANTALLA COMPLETA, CON PANELES EN PESTAÑAS (desde el 22-10-2026):
+      el mapa ocupa toda la pantalla entre dos barras fijas. Arriba,
+      «← Los mapas», el título, las PESTAÑAS (Herramientas, Lo elegido,
+      Lo que hay, El mapa en sí, Teclas y ratón), deshacer y rehacer, el
+      zoom y «Verlo entero»; abajo, guardar. Cada pestaña abre y cierra
+      su panel, que flota encima del mapa: las herramientas a la
+      izquierda (con lo de medir y la escala) y lo demás a la derecha, uno
+      debajo de otro, cada uno con su barra para bajar si no cabe. La ×
+      o Esc dentro de un panel lo cierran. Se recuerda cuáles tenías
+      abiertos (localStorage «mapa-paneles»; de salida, solo las
+      herramientas). «Lo elegido» se abre solo al elegir algo, y las
+      herramientas al medir o poner la escala. «Verlo entero» encaja el
+      mapa en el hueco que dejan los paneles abiertos. En pantallas
+      estrechas (menos de 768 px) se abre un panel cada vez. Todo fijo
+      (position: fixed, nada de sticky); mapas.js apunta lo que miden las
+      barras en --alto-arriba y --alto-barra. Al cambiar de herramienta,
+      un dibujo a medias con puntos de sobra se termina en vez de perderse.
+    - COMO UN MAPA DE LOS DE SIEMPRE, IGUAL QUE EL DE LA WEB (desde el
+      22-10-2026): el mapa llega hasta arriba y la barra de arriba son
+      PASTILLAS que flotan encima (volver y el título en una; una por
+      panel, con su icono; deshacer y rehacer redondos). El ZOOM va abajo
+      a la derecha en botones redondos (⤢ es «Verlo entero», +, la cifra
+      y −); la columna de la derecha deja ese carril libre. Los PANELES
+      son tarjetas redondeadas con sombra; la cabecera (asa ⠿, título, ×)
+      se queda quieta y lo de dentro baja con su propia barra. SE MUEVEN
+      a donde quieras: arrastrando la cabecera, o desde el asa con las
+      flechas (Mayús: más deprisa). Uno movido sale de su columna
+      (es-suelto, position: fixed) y se recuerda dónde
+      (localStorage «mapa-paneles-sitios»); el último que tocas queda
+      delante. Inicio en el asa, o dos clics en la cabecera, lo devuelven
+      a su columna, y la pastilla «⇱ Paneles a su sitio» (sale solo si
+      hay alguno movido) los devuelve todos. «Verlo entero» no cuenta los
+      sueltos ni lo que tapan las pastillas de arriba. En pantallas
+      estrechas no se mueven y las pestañas van en una fila que se
+      desplaza de lado.
+    - MOVERSE POR EL MAPA: la rueda acerca y aleja; se arrastra con «Elegir
+      y mover» en un hueco o, CON CUALQUIER HERRAMIENTA, con el BOTÓN DE EN
+      MEDIO. Eso va aparte de lo que estés haciendo: a mitad de un dibujo
+      (también a mano alzada, que se para mientras), arrastrando un sitio
+      o un punto (se lo lleva contigo), midiendo o escribiendo en un panel
+      no corta nada, no suelta lo elegido ni quita el foco. El mapa se
+      puede llevar MÁS ALLÁ DE SUS BORDES, con un reborde oscuro (siempre
+      queda un trozo a la vista), y alejar hasta tres veces el mapa
+      entero. Pulsar con el izquierdo en el mapa le pasa el teclado (Esc,
+      Supr, las flechas…).
+    - LOS PUENTES SALEN SOLOS (desde el 22-10-2026): donde un camino o
+      un sendero cruza un río se pinta un puente (el tablero del color
+      del camino tapando el río y los pretiles oscuros), sin poner ningún
+      sitio. No se guarda en el .cmap: se calcula al pintar, con la misma
+      cuenta en el editor (puentesDelMapa, mapas.js), en la imagen
+      descargada y en la web (puentes, mundo_mapas.py; miden lo mismo a
+      cualquier zoom, como los pines, y se apagan con los caminos). Solo
+      cuenta si el camino pasa de un lado al otro: uno que acaba en la
+      orilla, o que la toca y vuelve, no lleva puente. Al mover un camino
+      o un río, los puentes se mueven con él. En «El mapa en sí» dice
+      cuántos hay, y si quedan sitios «Puente» SIN NOMBRE puestos a mano
+      encima de uno automático, un botón los quita todos de una vez
+      (Ctrl+Z los devuelve). Los que tienen nombre o página se quedan.
+    - EL REPASO (pestaña «Repaso», desde el 22-10-2026): lo que se ha
+      quedado suelto, por grupos plegables. SITIOS SIN NOMBRE (menos los
+      «Puente»), TEXTOS VACÍOS, CAMINOS QUE CASI LLEGAN (una punta de
+      camino o sendero a poco de un sitio, o de otro camino, sin tocarlo;
+      lo que la web ya junta sola, a menos de 1/400 del lado largo del
+      mapa, no cuenta), REGIONES SIN PÁGINA (ni «Lleva a la página» ni se
+      llaman como una página de la wiki) y ENLACES A PÁGINAS QUE NO
+      EXISTEN. Cada aviso es un botón que te lleva a eso y lo elige; los
+      caminos que casi llegan tienen además «Llevarlo hasta…» o
+      «Juntarlo con…», que ponen la punta justo encima (Ctrl+Z lo
+      deshace). Se rehace solo mientras el panel está abierto.
+    - EL IMÁN (casilla «Imán», encendida): lo que se pone a menos de 12
+      píxeles de un sitio o de un punto se pone JUSTO ahí, y si no hay
+      punto pero sí un borde, encima del borde. Así el camino llega a la
+      ciudad, el río acaba en la costa y dos regiones vecinas comparten
+      los puntos de la frontera. Un aro amarillo dice dónde se va a
+      enganchar; con Alt pulsado no engancha. A mano alzada, solo los dos
+      extremos.
+    - ELEGIR Y MOVER: los sitios y los textos se arrastran; en las
+      regiones y las rayas se arrastran sus puntos, los pequeños de en
+      medio añaden uno y dos pulsaciones en uno lo quitan. En un hueco,
+      arrastrar mueve el mapa (o con el botón de en medio). Lo elegido se borra con Supr o con
+      «Borrar».
+    - DESHACER Y REHACER (Ctrl+Z y Ctrl+Y, o sus botones): antes de cada
+      cambio se apunta el mapa entero, hasta 80 pasos (menos si son muy
+      grandes, como el mapamundi). Escribir un nombre letra a letra o
+      mover un sitio con las flechas es UN paso. Dentro de una casilla de
+      texto, Ctrl+Z deshace lo escrito en ella, como siempre.
+    - PONER LA ESCALA (herramienta aparte): se marca un tramo que se
+      conozca (un extremo y el otro), se escribe cuánto es y en qué
+      (leguas, kilómetros o millas) y «Usar como escala». Ahí mismo, lo
+      que se anda en un día a pie y a caballo (8 y 12 leguas de entrada;
+      30 y 50 km; 20 y 30 millas). La escala se guarda y la web la pinta.
+    - MEDIR: se pulsa de un sitio a otro, punto a punto, y en el panel
+      de las herramientas sale cuánto hay (con el imán, de pin a pin exacto): con escala, en
+      su unidad y en DÍAS DE VIAJE; sin ella, en píxeles del mapa. La
+      medida no se guarda.
+    - TODO SE PUEDE HACER CON EL TECLADO: con el mapa elegido, las
+      flechas lo mueven (o mueven el sitio o el texto elegido), + y −
+      acercan, Intro pone un sitio, un texto o un punto en el centro, Fin
+      termina el dibujo y Esc lo cancela. Y en «Lo que hay» está la lista de
+      todo lo que hay, con botones para elegirlo, y las casillas X e Y.
+    - UN MAPA NUEVO: de qué página es, el título (si no, «Mapa del…» o
+      «Mapa de…» con el artículo que toque) y la imagen, que va a
+      wiki/_imagenes/mapas/ en WebP (hasta 4096 px de lado: un mapa
+      encogido no aguanta el zoom).
+    - LA ESCALA COMÚN, PARA JUNTAR LOS MAPAS (desde el 22-10-2026): todos
+      los mapas regionales van a 8 PÍXELES POR UNIDAD DEL MAPAMUNDI (el
+      .cmap del mapamundi mide 1920 × 1080; es la escala de Prunia). Al
+      hacer un mapa nuevo, con «Buscarlo en el mapamundi y ponerlo a la
+      escala común» (marcado), el editor encuentra solo dónde cae la
+      imagen en el mapamundi (OpenCV: vale para los que salen de un trozo
+      del mapamundi, aunque estén retocados o ampliados) y la deja a la
+      medida que le toca, AMPLIADA CON IA si está marcado (Real-ESRGAN:
+      sale nítida, no borrosa; «Qué clase de imagen es»: pintada, la
+      mayoría, o dibujo de líneas limpias). Su sitio queda en el .cmap,
+      en "world" (x, y, ancho y alto en unidades del mapamundi; Chronicler
+      no lo usa). Si no lo encuentra, el mapa se hace igual, tal cual, y
+      lo dice. Como mucho 8192 px de lado: uno más grande va a la escala
+      que quepa, y avisa. Todo en herramientas/0-comun/mapas_mundo.py.
+    - EN «EL MAPA EN SÍ» → EN EL MAPAMUNDI: dónde está (con el mapamundi
+      en pequeño y su recuadro) y a qué escala va; «Buscarlo en el
+      mapamundi» (para los de antes, como Prunia); X, Y y el ancho a mano,
+      para los dibujados de cero; y «Llevarlo a la escala común», que
+      amplía (o encoge) la imagen a su medida. Y «AMPLIAR LA IMAGEN»: vez
+      y media, el doble, el triple o cuatro veces, con IA o sin ella. En
+      los dos, lo puesto encima se queda en su sitio (cada coordenada y la
+      escala, a la medida nueva) y la imagen de antes no se borra.
+    - EL MAPAMUNDI CON TODO LO DE LOS MAPAS REGIONALES (desde el
+      22-10-2026): al pasar la wiki a la web, lo que se pinta en cada mapa
+      regional SITUADO (con "world") sale también en el mapamundi, en su
+      sitio: los asentamientos y demás sitios, los caminos, los senderos,
+      las rutas y los ríos (y los puentes, que salen solos). Sus regiones
+      (lagos, bosques, países vecinos), sus fronteras y sus textos no: el
+      mapamundi tiene los suyos. Con «ver: solo la imagen» (sin los
+      países) queda el mapa de rutas del mundo entero, y «ruta» busca el
+      camino también de un país a otro, con la escala y los días de viaje
+      del primer regional que la tenga. Con regionales dentro, el
+      mapamundi deja acercar hasta el 1600% y los nombres de los pueblos
+      salen desde el 400%. EN EL MAPAMUNDI, lo regional sale al acercarse
+      (es-regional): sus caminos, ríos, capitales y ciudades desde el
+      200%; los demás sitios y los puentes desde el 400%; y sus pines van
+      más pequeños (9 px de radio en pantalla, data-mapa-pin; los nombres
+      no encogen). Pasan también sus ZONAS NATURALES (lagos, mares,
+      bosques, montañas, desiertos, pantanos y valles, con su trama a la
+      escala de su mapa; no los países vecinos, las provincias ni las
+      regiones sin clase), en su propio grupo con la casilla «zonas
+      naturales» de «ver»: se ven también con «solo la imagen», y salen en
+      «zonas» y en la leyenda. Cada camino conserva el detalle y las
+      tolerancias de la red de su mapa: la ruta mide lo mismo que en el
+      mapa regional. Lo junta juntar_regionales (mundo_mapas.py), lo llama
+      generar-mundo.py. Un mapa sin situar no sale: sitúalo en «El mapa en
+      sí» → «En el mapamundi».
+    - LOS MAPAS VECINOS Y LO QUE PASA DE UN REINO A OTRO (desde el
+      05-11-2026). Cada mapa regional sigue con sus rayas, pero:
+        · EN EL EDITOR, en un mapa situado, la casilla «Los mapas vecinos»
+          (debajo de «Imán»; sale si hay alguno) pinta EN GRIS las rayas y
+          los sitios (con su nombre) de los regionales cuyo recuadro se
+          pisa con el suyo en el mapamundi, ya en las medidas de este mapa
+          (vecinos_de, editor-wiki.py; pintarVecinosMapa, mapas.js). No se
+          tocan ni se guardan: están para ver por dónde sigue un río o un
+          camino al otro lado y para que EL IMÁN ENGANCHE A ELLOS (a sus
+          puntos y a sus bordes). Un camino que se lleva con el imán hasta
+          el del reino de al lado queda unido.
+        · EN EL MAPAMUNDI, LOS CAMINOS ENGANCHADOS SON UNO: la red de
+          caminos junta las puntas que se tocan, así que «ruta» va de una
+          ciudad de un reino a una de otro por los caminos de los dos.
+        · Y LOS RÍOS SE JUNTAN (_juntar_rios_que_siguen, mundo_mapas.py):
+          un río que en un mapa acaba donde empieza el del otro (punta con
+          punta: el imán) sale como uno solo, que se ensancha seguido. Y EL
+          MISMO RÍO DIBUJADO EN LOS DOS MAPAS (con el mismo nombre, como el
+          Río Iblis en Prunia y en Telzaria) sale una vez: el del mapa más
+          fino, alargado con lo que el otro tenga de más por sus puntas.
+          Así no sale dos veces en la lista ni pintado doble.
+        · Y EN LA WEB, CADA MAPA REGIONAL ENSEÑA LO DE SUS VECINOS QUE CAE
+          DENTRO DE SU IMAGEN, solo (poner_vecinos, mundo_mapas.py; lo
+          llama generar-mundo.py después de juntar el mapamundi): sus
+          sitios y sus caminos, senderos, rutas y ríos, recortados al borde
+          de la imagen, sin tocar el .cmap. Telzaria lleva los pueblos y
+          caminos de Prunia que salen en su dibujo, y su ruta los sigue. No
+          repite lo que el mapa ya tiene: lo que se llama igual que algo
+          suyo de la misma clase, lo que se trajo en el editor ("fromLine")
+          y lo que el vecino trajo de otro. Esto no pasa al mapamundi.
+        · TRAERLOS A ESTE MAPA: en «El mapa en sí» → «Los caminos y ríos
+          de los vecinos» (sale si hay vecinos) se marcan ríos, caminos
+          principales y senderos y «Traerlos a este mapa» los COPIA como
+          rayas suyas, recortadas al borde del mapa (traerDeLosVecinos y
+          recortarRayaAlMapa, mapas.js). Así la página del mapa regional
+          enseña también los del país de al lado. Llevan "fromMap" (el
+          .cmap de donde vienen) y "fromLine" (su id allí): volver a
+          traerlos rehace lo traído con lo que tengan ahora los vecinos (no
+          se duplica), «Quitar lo traído» los quita todos (Ctrl+Z los
+          devuelve), en el mapamundi no pasan (allí ya va el de su mapa:
+          juntar_regionales se salta las "copia") y los vecinos no se los
+          traen de vuelta. Lo que este mapa ya tiene dibujado (la misma
+          clase y el mismo nombre, como el Río Negro) no se trae.
+    - AMPLIAR EL MAPAMUNDI: solo cambia su imagen, NO sus coordenadas
+      (siguen siendo 1920 × 1080): los mapas regionales guardan su sitio
+      en ellas. Por eso en el mapamundi no sale «En el mapamundi».
+    - LAS AYUDAS SE INSTALAN UNA VEZ en cada ordenador: menú → Imágenes →
+      «Instalar las ayudas de los mapas» (2-imagenes/instalar-ayudas-de-
+      mapas.py). Pone OpenCV con pip y baja el ampliador con IA
+      (realesrgan-ncnn-vulkan, unos 45 MB, de github.com/xinntao/Real-ESRGAN)
+      a herramientas/programas/realesrgan/, que no va a GitHub. Usa la
+      tarjeta gráfica (Vulkan; vale la integrada): son segundos. Con
+      --comprobar dice qué hay y prueba el ampliador. Sin las ayudas, el
+      editor lo dice debajo de «Un mapa nuevo» y amplía sin IA (Lanczos
+      y un poco de nitidez).
+
+    - DESCARGAR LA IMAGEN (en la barra de abajo): abre su panel, para
+      ELEGIR QUÉ SALE (desde el 22-10-2026). Una casilla por cada cosa
+      que tenga el mapa, con cuántas hay: cada capa del fondo, cada clase
+      de región (lago, bosque, país vecino…) y sus nombres, cada clase de
+      raya (caminos y senderos, ríos, fronteras…) y los puentes (sin los
+      ríos no salen), cada tipo de sitio (capital, ciudad, pueblo…) y sus
+      nombres, los textos sueltos y la barra de escala; y la rosa de los
+      vientos en la esquina que quieras (o sin ella). «Marcar todo» y
+      «Quitar todo». Además: EL RECORTE (el mapa entero o solo lo que se
+      ve en pantalla; la escala y la rosa van en las esquinas del
+      recorte), EL TAMAÑO (de la mitad a cuatro veces, con 8192 px de
+      lado como mucho; dice cuánto saldrá) y EL FORMATO (PNG, JPG o
+      WebP). Se recuerda en el navegador (localStorage «mapa-descarga»)
+      lo que quitaste, así lo nuevo de un mapa sale marcado. Va tal y
+      como esté en el editor aunque no esté guardado. Se pinta en un
+      <canvas> desde los datos, así que no depende del zoom con que lo
+      estés mirando.
+
+  «GUARDAR Y PASAR A LA WEB» LLEVA BARRA DE PROGRESO (en las páginas y en
+  los mapas): el servidor pasa la wiki en otro hilo y el editor le
+  pregunta cómo va cada poco (/api/pasar/estado). Se cuenta por el tiempo
+  que tardó cada script la última vez (apuntado en la carpeta temporal,
+  editor-wiki-ultima-pasada.json) y por las líneas que lleva escritas: solo
+  con las líneas iba a saltos, porque los scripts escriben casi todo al
+  final. Es un <progress> de verdad, y mientras dura el aviso lleva
+  aria-busy para que el lector de pantalla no cante cada porcentaje.
+
+  EL .cmap SE GUARDA ENTERO: va y vuelve con todo lo que traiga (lo de
+  Chronicler que el editor no conoce también), con el mismo sangrado y
+  los mismos saltos de línea. Los avisos del editor de mapas salen en la
+  barra de abajo y no arriba: arriba empujaban el mapa mientras se
+  pulsaba en él.
+
+  LAS IMÁGENES SUBIDAS pasan por un archivo temporal, porque traer() de
+  imagenes.py trabaja con rutas. Ese archivo se cierra nada más
+  escribirlo: tempfile.mkstemp lo deja abierto y en Windows un archivo
+  abierto no se puede borrar («[WinError 32] … está siendo utilizado por
+  otro proceso», que hacía fallar la subida). Y si aun así no se deja
+  borrar, se queda en la carpeta temporal en vez de tumbar la subida.
+
+
+  LA PORTADA DE LA WIKI, POR APARTADOS
+
+  sitio/wiki/index.html —la Wiki Cralëa— no reparte las páginas por
+  las carpetas de la bóveda, sino por unos apartados grandes —el
+  MAPAMUNDI (Azarasia, Partaria, Archipiélagos),
+  personajes, religión, cosas, mapas— y, dentro de cada uno, por las
+  etiquetas que le queden a cada página.
+
+  ARRIBA SOLO HAY BUSCADOR: los botones de etiquetas se quitaron el
+  11-10-2026 (con el mapamundi eran una pared de treinta botones). El
+  buscador mira también las etiquetas de cada página, así que buscar
+  «Partaria» saca todo lo de Partaria, y la etiqueta que se pulsa en una
+  página lleva a la portada con ella buscada (?buscar=Partaria). Quien
+  esconde lo que no pasa la búsqueda es mundo.js (al no estar filtros.js
+  en esa página). Una carpeta es cómo tienes
+  guardados los archivos; eso no tiene por qué ser cómo se busca una
+  cosa.
+
+  ORGANIZADA COMO LAS PORTADAS DE LAS WIKIS DE MUNDOS (el portal de
+  geografía de A Wiki of Ice and Fire y los paneles de Kanka y World
+  Anvil):
+
+    - HOY EN CRALËA, debajo del título: el año de «hoy» de la línea de
+      tiempo y su era. Y un botón de UNA PÁGINA AL AZAR.
+    - PÁGINA DESTACADA (cambia cada día, la misma para todos ese día) y
+      ¿SABÍAS QUE…? (tres al azar). Solo salen las páginas con texto de
+      verdad: ni las de relleno, ni las que solo dicen dónde están, ni la
+      de ejemplo.
+    - ÚLTIMOS CAMBIOS: las seis páginas tocadas hace menos (la fecha de
+      su último commit, o la del archivo si tiene cambios sin subir).
+    Hoy y los cambios salen de sitio/wiki/datos/mundo-portada.json, que escribe
+    generar-mundo.py; lo demás, de mundo.json, en el navegador.
+
+
+    - «Para empezar»: una línea con el mapamundi, la línea de tiempo y
+      un enlace a las regiones. Está escrita a mano en index.html.
+    - BUSCA UNA REGIÓN: una tarjeta por parte del mundo (en el "orden"
+      de mundo-categorias.json) con su mapa de situación en pequeño, su
+      nombre y cuántas páginas tiene; nada más (con sus regiones debajo,
+      cada tarjeta medía distinto). Sale de
+      sitio/wiki/datos/mundo-regiones.json, que escribe generar-mundo.py, y las
+      miniaturas (360x240, unos 15 KB) de sitio/wiki/imagenes/situacion/peque/.
+      Una parte sin página propia (Archipiélagos) se dibuja con todas sus
+      páginas resaltadas (esa miniatura se rehace SIEMPRE: lo que la
+      cambia es qué carpetas tiene dentro, y eso no se ve en la fecha de
+      ningún archivo), y su tarjeta abre su parte en la ventana.
+      Mientras se busca algo, esta rejilla se esconde.
+    - UN BOTÓN POR SECCIÓN, con su icono: las de
+      sitio/wiki/datos/mundo-categorias.json, en su orden y con el "icono" de
+      cada una (Mapamundi 🗺️, cosmología 🌌, historia 📜, lugares 🏰,
+      personajes 👤, razas 🧝, religiones 🕯️, organizaciones 🏛️, monstruos
+      🐉, lo demás 🔮). Salen AUNQUE ESTÉN VACÍAS (con «todavía vacía» y
+      el borde de rayas), para que se vea qué hay previsto; una página cae
+      en una al llevar una de sus etiquetas. Los objetos mágicos van en
+      «lo demás»: una página con la etiqueta «objetos mágicos» cae ahí,
+      en su propio apartado. Los mapas no llevan botón, que ya están a la
+      vista en la columna de la derecha. Los botones van justo
+      debajo del buscador. Cada uno abre su VENTANA (la de siempre,
+      ventana-modal.js) con lo que tiene dentro; ya no sale todo seguido
+      en la portada. Mientras se busca algo, los botones se quitan y sale
+      lo encontrado en la propia portada, por secciones.
+    - EN LA VENTANA DEL MAPAMUNDI, una parte del mundo por apartado, que
+      se pliega y se despliega (abiertos de serie), y dentro SOLO LOS
+      PAÍSES, sin las páginas de las regiones, en una rejilla: la bandera
+      grande arriba y el nombre debajo (sin bandera, el hueco vacío). Los
+      demás apartados (historia, lo demás) siguen con tarjeta. Al BUSCAR
+      sí salen las regiones, cada país debajo de la suya.
+    - Llegar a la portada con #mundo-<parte> (las migas de una entrada, la
+      tarjeta de Archipiélagos) abre la ventana del mapamundi en esa parte.
+    - A la derecha, como antes, los mapas y la línea de tiempo.
+
+  Y CADA SUBAPARTADO TAMBIÉN (Azarasia, Partaria… dentro de Mapamundi,
+  los eventos dentro de historia), con su flecha y su cuenta, y se
+  recuerda igual que los apartados.
+
+  CADA APARTADO SE PLIEGA. Son <details>, o sea que se abren y se
+  cierran con el ratón y con el teclado sin que haya nada que
+  programar, y lo que dejes plegado se recuerda en tu navegador. Al
+  buscar se abren solos los que tengan algo dentro y se
+  vuelven a plegar al borrar la búsqueda: encontrar tres páginas y no
+  verlas porque el apartado estaba cerrado sería peor que no
+  encontrarlas.
+
+  Y EN PANTALLA ANCHA SON DOS COLUMNAS: el índice a la izquierda y los
+  mapas a la derecha, con la silueta de cada uno (de 1400px para arriba;
+  por debajo, una columna y los mapas entre la cabecera y el índice). La
+  silueta es un .svg que escribe el generador en sitio/wiki/imagenes/, con las
+  formas del mapa simplificadas a lo bruto: se reconoce el mundo de un
+  vistazo y pesa lo que una foto pequeña.
+
+  EL NOMBRE DE LA WIKI está escrito en cuatro sitios y no en un ajuste,
+  porque cambiarlo es cosa de una vez: el menú
+  (fragmentos/barra-lateral.html), la portada
+  (sitio/wiki/index.html), las dos plantillas de
+  herramientas/plantillas/mundo-*.html y el nombre de la sección en
+  generar-mapa.py y generar-buscador.py.
+
+  LAS CARPETAS SE LLAMAN wiki/ (la bóveda), sitio/wiki/ (las páginas) e
+  sitio/wiki/imagenes/ (sus imágenes). Hasta el 10-10-2026 se llamaban mundo/,
+  y por eso los archivos de dentro de herramientas/, estilos/ y scripts/
+  (generar-mundo.py, mundo.css, mundo.js, sitio/wiki/datos/mundo.json...) y las
+  clases .mundo-* siguen con el nombre viejo: son nombres de piezas, no
+  direcciones, y no se ven desde fuera. Las direcciones viejas
+  (/web/mundo/...) llevan a las nuevas: ver LAS DIRECCIONES QUE SE
+  MUDAN, abajo.
+
+  QUIÉN MANDA: sitio/wiki/datos/mundo-categorias.json, que se edita a mano y no lo
+  reescribe nadie. Es una lista de apartados, cada uno con las etiquetas
+  que caen en él:
+
+      [ { "nombre": "Mapamundi", "etiquetas": ["mapamundi"],
+          "orden": ["Azarasia", "Partaria", "Archipiélagos"] },
+        { "nombre": "países",
+          "etiquetas": ["pais", "país", "reino", "imperio"] }, … ]
+
+  "orden" es opcional: el orden de los subapartados de ese apartado. Sin
+  él, por orden alfabético.
+
+  Una página va al PRIMER apartado del que lleve alguna etiqueta, y las
+  que le sobren son las que la reparten por dentro: una página con
+  «Pais, Reino, Azarasia» va a «países» y sale debajo de «azarasia». Si
+  le quedan varias, sale una vez por cada una (la cuenta de arriba cuenta
+  páginas distintas, no tarjetas). Las mayúsculas y las tildes dan
+  igual.
+
+  El orden de los apartados en la portada es el del archivo. Lo que no
+  caiga en ninguno va al final, en «lo demás», y al terminar se cantan
+  las etiquetas de esas páginas: ésa es la lista de lo que falta por
+  añadir al archivo (o de lo que está escrito de dos maneras).
+
+  DEBAJO DEL MAPA ESTÁ LA LISTA DE SITIOS, y no es un extra: es el mapa
+  en texto. Un dibujo no dice nada a quien no lo ve bien, ni a un
+  lector de pantalla, ni al tabulador, así que todo lo que hay en el
+  mapa está también ahí, en orden alfabético y con el mismo enlace. Por
+  eso el dibujo va con aria-hidden y sus enlaces sin tabulador: no se
+  esconde nada, es que lo mismo no se cuenta dos veces. Pasar por una
+  fila de la lista enciende su región en el mapa.
+
+  LO QUE NO TIENE NOMBRE NO SE PUEDE PULSAR. En el mapamundi de ejemplo
+  hay 123 formas y 106 no tienen ni nombre ni enlace: son el dibujo
+  (fronteras, costas, lo que todavía no es nada). Se pintan flojas y ya
+  está; un tabulador que pasa por 106 cosas sin nombre no es navegar.
+
+  UNA REGIÓN LLEVA A LA PÁGINA QUE SE LLAMA COMO ELLA. Si en el mapa no
+  tiene puesto a dónde lleva, pero hay una página de la wiki con su mismo
+  nombre («Reino de Prunia» → su .md, esté en la carpeta que esté), lleva a
+  esa. Así están enlazadas las 120 regiones del mapamundi sin tocar el
+  .cmap, y una página nueva queda enlazada desde el mapa en cuanto existe
+  (está en _destinos, en herramientas/0-comun/mundo_mapas.py).
+
+  REGIONES Y PAÍSES. El mapamundi tiene dos tamaños de cosa: las
+  REGIONES (Azarasia, Partaria, Tierras Encantadas, un archipiélago…) y
+  los PAÍSES que hay dentro. Pintadas a la vez, una región tapa a sus
+  países, así que el mapa enseña una cosa u otra: en sus mandos, «ver:
+  países / regiones / solo la imagen». Se empieza viendo los países. Un
+  país que no es de ninguna región (Reino de Zaustilla, Isla de
+  Telvetia, Cuna de Quimeras: islas grandes e independientes) sale en
+  los dos modos. La silueta de la portada pinta los países.
+
+  QUIÉN ES REGIÓN Y QUIÉN PAÍS lo dicen las páginas: el campo «región»
+  de la ficha (región: "[[Partaria]]"). Lo que alguna página nombra como
+  su región es una región; lo que tiene región es un país suyo. Así,
+  para mover un país de región, o para que una forma nueva del mapa sea
+  región, basta con cambiar las fichas y pasar la wiki. Si ninguna
+  página lo dijera, se adivina por el dibujo (lo que tiene otra forma
+  dentro es región). Está en niveles(), en mundo_mapas.py.
+
+  LAS PÁGINAS están en wiki/Mapamundi/, por partes del mundo:
+
+      wiki/Mapamundi/Azarasia/           el continente y sus países
+      wiki/Mapamundi/Partaria/           el continente y sus países
+      wiki/Mapamundi/Archipiélagos/      el Archipiélago de Lunas, el de
+          …                              las Costras, los Faros del Mar
+          Islas de Labros/               Ciego, la Cuna de Quimeras, las
+          Isla de Arbenia/               Islas de Labros, la Isla de
+                                         Arbenia, Zaustilla, Telvetia y
+          Tierras Encantadas/            las Tierras Encantadas, con el
+              Archipiélago Fragmentado/  Archipiélago Fragmentado dentro
+                                         (todo esto, desde el 15-10-2026;
+                                         antes Labros, Arbenia, Zaustilla
+                                         y Telvetia eran de Azarasia, y
+                                         las Tierras Encantadas, una
+                                         parte del mundo aparte)
+
+  EN LA WEB, LAS MISMAS CARPETAS. sitio/wiki/ repite la estructura de
+  wiki/, con los nombres pasados a dirección (sin tildes ni espacios):
+  wiki/Mapamundi/Azarasia/Islas de Labros/Corte de Labros.md sale en
+  sitio/wiki/mapamundi/azarasia/islas_de_labros/corte_de_labros.html. Si
+  mueves un .md de carpeta, su página se muda sola al pasar la wiki (y la
+  vieja se borra). La línea de tiempo, que no sale de wiki/, va en su
+  propia carpeta: sitio/wiki/linea-de-tiempo/ (con guion, para que no
+  pueda chocar nunca con una carpeta de la bóveda).
+
+  EL MAPA DE SITUACIÓN. Cada página que se llama como una forma del mapa
+  lleva un recorte del mapamundi con ella resaltada: el resto
+  oscurecido, su contorno en amarillo y las fronteras de alrededor en
+  fino (y un círculo si es una isla diminuta). Va en el ARTÍCULO, a lo
+  ancho del texto y después del primer párrafo (no en la ficha: a 17rem
+  una isla era un punto). Debajo, «Dónde está <la página>, en el
+  Mapamundi de Cralëa», con enlace al mapa. Los hace
+  herramientas/0-comun/mundo_situacion.py al pasar la wiki, en
+  sitio/wiki/imagenes/situacion/ (1200x800, unos 75 KB cada uno; 116 son unos
+  9 MB), y solo rehace los que hagan falta: si cambias el .cmap, la
+  imagen del mapa o la forma de dibujarlos, se rehacen todos.
+
+  EN EL MAPAMUNDI, al pasar el ratón por un país sale su bandera en el
+  globo, encima del nombre (data-mapa-bandera, que pone el generador en
+  cada país con bandera).
+
+  LA BANDERA, EL BLASÓN Y EL MAPA van arriba del todo de la ficha, en el
+  mismo hueco, como un carrusel: dos flechas debajo para pasar de uno a
+  otro y, entre ellas, cuál se ve («Mapa · 2 de 2»). El mapa es el de
+  situación, y es el único sitio donde sale: el artículo ya no lo lleva
+  a lo grande (se quitó el 15-10-2026). Una región, sin bandera, lleva
+  solo el mapa. Se ponen en el frontmatter:
+
+      bandera: reino_prunia.webp
+      blasón: reino_prunia_blason.webp      (o blason:, o escudo:)
+
+  y las imágenes van en wiki/_imagenes/banderas/ (como las demás de la
+  wiki, se buscan por el nombre).
+  La bandera sale también en la portada, pequeña, delante del nombre de
+  cada país. Las 33 primeras (las que subiste el 14-10-2026 a
+  sitio/wiki/imagenes/banderas/) se pasaron a WebP de 600x400 (de 4,6 MB a
+  unos 460 KB) y se movieron a wiki/_imagenes/banderas/: sitio/wiki/imagenes/
+  la escribe el generador, y lo que se deja ahí a mano no lo enlaza
+  nadie.
+
+  LAS OTRAS 74 BANDERAS (las de los países que no tenían) las dibujó
+  Claude el 15-10-2026 con un script, para que no hubiera huecos: el
+  tipo de país pesa en el dibujo (las tribus llevan zigzag o dientes, los
+  mandatos de Partaria comparten disposición, las ruinas van en colores
+  apagados, las cumbres llevan montes…) y el resto sale del nombre. Son
+  de relleno: cuando tengas la de verdad, pon su archivo en
+  wiki/_imagenes/banderas/ y cambia el campo bandera: de esa página.
+
+  LA FICHA DE LOS PAÍSES. Los 107 llevan (desde el 15-10-2026) los datos
+  de la plantilla de país en su ficha, debajo de la bandera y la región:
+  nombre oficial, gentilicio, capital, forma de gobierno, gobernante,
+  heredero, casa reinante, población, pueblos, lenguas, religión,
+  moneda, fundación y lema, en tres tramos (Gobierno, Gentes, Historia).
+  Todos dicen «*por decidir*» hasta que se rellenen: se buscan por esa
+  frase. Si uno no tiene sentido para un país (una tribu sin casa
+  reinante), se borra la línea y deja de salir.
+
+  Con la ficha así de larga, el cuadro de contenido (abajo a la derecha)
+  no tiene sitio mientras se ve la ficha: se pliega solo en su barra de
+  título y se vuelve a abrir al bajar y dejar sitio. Eso no cuenta como
+  plegarlo tú (no se recuerda en la página siguiente).
+
+  TEXTO DE RELLENO. Los 107 países llevan, también desde el 15-10-2026,
+  unos apartados de relleno (Historia, con Orígenes dentro; Gobierno y
+  sociedad; Cultura), cada párrafo empezando por «*Texto de relleno.*»,
+  para que se vea cómo queda el contenido de la página. Se buscan por
+  esa frase y se cambian por lo de verdad.
+
+  EL CALENDARIO, EL CICLO DE LOS HERALDOS (wiki/Calendario/, el
+  15-10-2026, de la página de Notion): una entrada de la wiki con la
+  tabla del año (mes, Heraldo, estación y festividad), la rejilla de un
+  mes (28 días = 4 semanas justas, así que todos los meses empiezan en
+  Día del Sol), cada mes con su texto, los cuatro días del Fin del Ciclo
+  y los días de la semana. Sale en la sección «historia» (la etiqueta
+  «calendario» está en la de historia, en mundo-categorias.json).
+
+  La entrada lleva también la etiqueta Cosmología, así que sale en la
+  ventana de cosmología (apartado «Calendario»), y «La Cosmología de
+  Cralëa» la enlaza en su apartado «El tiempo». La estación de cada mes
+  va siempre en tres tiempos: principio, la estación a secas y fin (el
+  Mes de Espectro es el fin del otoño).
+
+  Y EN LA PORTADA DE LA WIKI, en la columna de la derecha entre el
+  mapamundi y la línea de tiempo (cada uno con su título encima), el
+  calendario en una tarjeta: el mes con su estación (los meses NO dicen
+  quién los rige: eso puede cambiar; está en la entrada), flechas para
+  pasar de mes (los doce y, detrás, los cuatro días del Fin del Ciclo;
+  del último se vuelve al primero) y la rejilla de 7 × 4 con los días
+  que tienen algo resaltados. Lo de cada día NO va escrito debajo: sale
+  en un globo al pasar el ratón por encima del número (como los países
+  del mapamundi) o al llegar con el tabulador. Y cada día resaltado es
+  un enlace: lleva a la página de lo que pasa ese día, si se le ha
+  puesto una, o a su mes en la entrada del calendario. Debajo, «leer
+  sobre este mes» y el título, a la entrada entera.
+
+  Lo que se marca está en sitio/wiki/datos/calendario.json, y se lleva con
+  herramientas/1-publicar/calendario.py (en el menú, en Wiki Cralëa).
+  Cada cosa tiene nombre, mes (1 a 12, o 13 para el Fin del Ciclo), día
+  (hace falta: es el número que se resalta), tipo (festividad, que se
+  repite cada año, o evento, que pasó un año concreto: se le puede poner
+  el año), un resumen y, si quieres, un enlace a una página de la wiki
+  (pulsar el día lleva a ella). Las doce festividades principales están, DE
+  MOMENTO, todas el día 12 de su mes (la página de Notion no decía qué
+  día caen): cuando lo sepas, cámbialas. También se puede fijar «hoy» en
+  Cralëa (un mes y un día): se marca y el calendario abre en ese mes;
+  sin él, abre en el primero. Cómo es el año (meses, Heraldos, estación,
+  semana) también está en ese JSON, copiado de la entrada; si algún día
+  cambia uno, cambia los dos.
+
+  EN LA VENTANA DEL MAPAMUNDI, una parte del mundo que tiene regiones
+  dentro (Archipiélagos) va repartida en un apartado por región (cada
+  archipiélago, las Tierras Encantadas, y el Archipiélago Fragmentado
+  justo debajo de ellas), más uno de «Independientes» con los países que
+  no son de ninguna (Telvetia, Zaustilla, la Cuna de Quimeras).
+
+  EL CONTENIDO DE UNA ENTRADA no tapa la ficha: mientras la ficha se ve,
+  mide como mucho el hueco que queda entre ella y el fondo de la pantalla
+  (con su propio scroll); al bajar y perderla de vista, crece.
+
+  LA COSMOLOGÍA (wiki/Cosmología/, el 15-10-2026, sacada del PDF de
+  Notion): «La Cosmología de Cralëa» (el Jardín del Último Canto y los
+  Mundos Tributo), La Luna, El Sol, Nevadra, Lurmeri y Gomath. Cada una
+  lleva de imagen una FOTO DE LA NASA PARECIDA, con su referencia al
+  final de la página (apartado «La imagen»). Las fotos no están: desde
+  donde se escribió esto no se podían descargar. Para ponerlas, baja cada
+  una de su enlace y pásala con
+
+      python herramientas/2-imagenes/traer-imagen.py --para mundo --nombre nasa-luna
+
+  (nasa-luna, nasa-sol, nasa-nevadra, nasa-lurmeri, nasa-gomath): se
+  queda en wiki/_imagenes/ en WebP y con el nombre que esperan las
+  páginas. Hasta entonces, al pasar la wiki se avisa de que faltan.
+
+  EN LA FICHA, lo primero es la bandera (el carrusel) y luego sus datos:
+  el título de la ficha, que repetía el de la página, solo lo oye el
+  lector de pantalla.
+
+  UNA REGIÓN enseña sus países en la misma rejilla de banderas de la
+  portada, en su apartado «Países» (en lugar de la lista que haya escrita
+  en el .md; si no lo tiene, se añade al final). Sale de la «región» de
+  cada ficha, así que no se queda atrás si un país cambia de sitio.
+
+  LA NAVEGACIÓN DE CADA ENTRADA, como en una wiki de las de siempre:
+  arriba, DÓNDE ESTÁS (Wiki Cralëa › Mapamundi › Azarasia › Islas de
+  Labros › Corte de Labros: sale de la «región» de cada ficha y de la
+  carpeta), y el CONTENIDO de la página, con un enlace al mapa de
+  situación, a cada apartado (## y ###) y a «se habla de esto en». Con
+  menos de dos cosas no sale. En escritorio va FIJO abajo a la derecha de
+  la pantalla (sigue ahí al bajar) y se pliega pulsando «Contenido»; se
+  recuerda plegado o no entre páginas (richi-contenido-plegado, en el
+  navegador). En móvil va quieto y arriba del todo, antes de la ficha.
+  Los eventos de la línea de tiempo llevan sus migas también (Wiki
+  Cralëa › Línea de tiempo › el evento) y, desde el 18-10-2026, su
+  Contenido, igual que las demás (sale cuando su texto tiene dos
+  apartados o más; lo pinta pintar_contenido, en mundo_piezas.py, que
+  usan generar-mundo.py y mundo_linea.py).
+
+  LAS IMÁGENES SE AMPLÍAN. Cualquier imagen de una página de la wiki (el
+  mapa de situación, las fotos de la ficha, las del artículo) se ve en
+  grande al pulsarla, con la lupa (sitio/wiki/scripts/componentes/lupa.js, la misma
+  del retrato de un NPC). Lo monta sitio/wiki/scripts/paginas/mundo.js: envuelve
+  cada imagen en un botón, así que funciona también con el teclado, y se
+  cierra con la ✕, pulsando fuera o con Escape. Las que ya están dentro de
+  un enlace o de un spoiler se dejan como están.
+
+  Cada una lleva las etiquetas «Mapamundi» y su parte del mundo, que es
+  lo que la pone en el apartado MAPAMUNDI de la portada, repartida en
+  Azarasia, Partaria y Archipiélagos (en ese orden:
+  el "orden" de ese apartado en sitio/wiki/datos/mundo-categorias.json). Las
+  regiones tienen además la lista de sus países.
+
+  EN EL .CMAP se cambiaron a mano, el 11-10-2026, para que cuadre con
+  esto: Isla de Terredia → Isla de Arbenia, Archipiélago Yit → Islas de
+  Labros, Islas Fragmentadas → Archipiélago Fragmentado, Zona Perdida →
+  Tierras Encantadas, Partaria del Norte y del Sur → Partaria (dos formas
+  con el mismo nombre), y se quitaron Isla de Esmirma, Isla de Telvet,
+  Isla noseque y una Cuna de Quimeras que estaba dibujada dos veces.
+  Si vuelves a exportar el mapa desde Chronicler, haz allí los mismos
+  cambios o se deshacen.
+
+  LOS CONTORNOS SE SIMPLIFICAN, porque van dentro del HTML. El mapamundi
+  trae 29.321 puntos; con el algoritmo de Ramer-Douglas-Peucker a 3px
+  de tolerancia —sobre un lienzo de 7.680, o sea un 0,04% del ancho— se
+  quedan en 13.581 y a simple vista es el mismo dibujo. Se cambia con
+  --detalle (0 los deja enteros y la página pesa el doble).
+
+  LAS IMÁGENES SE BUSCAN COMO LAS BUSCA CHRONICLER: por el nombre, estén
+  en la carpeta que estén (_imagenes/mapas/, _imagenes/banderas_y_heraldica/…).
+  Da igual que la página o el mapa las nombren con la carpeta delante, con
+  la barra de Windows o solo por el nombre; y si lo que piden es un .png y
+  lo que hay es el mismo archivo en .webp, usa el que hay y lo dice. Esto
+  está así desde que al traer la bóveda de verdad no se veía ninguna
+  imagen: estaban todas, pero nombradas con su carpeta delante.
+
+  LAS IMÁGENES DE FONDO SE ENCOGEN a 2.560 de ancho y se pasan a WebP:
+  el fondo del mapamundi es un PNG de 7680x4320 y varios megas que no
+  se ven, porque por muy grande que sea la pantalla el mapa no se pinta
+  más grande que eso. Para encogerlas hace falta Pillow, la misma que
+  2-imagenes/optimizar-imagenes.py; si no está, se copian tal cual y se
+  avisa.
+
+  UNA REGIÓN PUEDE LLEVAR A UNA PÁGINA DE LA WIKI (targetPage) O A OTRO
+  MAPA (targetMap), y si lleva a una página que todavía no está escrita
+  sale en la lista marcada como «sin página» y en el informe del final,
+  con las demás que faltan. Al revés también: la página de un sitio que
+  está dibujado en un mapa lleva el mapa en su «se habla de esto en»,
+  que es la única forma de llegar desde el sitio al mapa donde está. Y
+  un [[enlace]] normal desde cualquier artículo puede llevar al mapa,
+  porque en la bóveda un mapa es un archivo con su nombre, como una
+  página.
+
+  CADA ARTÍCULO ES UN HTML DE VERDAD, no una página que se pinta sola
+  con JavaScript. Eso es a propósito: cada uno tiene su dirección y se
+  puede enlazar y compartir, se lee sin JavaScript (que es lo que hace
+  que lo encuentre Google y que se imprima), y su texto está dentro del
+  archivo, así que el buscador del sitio lo indexa como cualquier otra
+  página.
+
+  LO QUE SE PUBLICA ES TODO: no hay páginas privadas. Los ||spoilers||
+  salen tapados y se destapan al pulsarlos, pero eso es un juego visual
+  y no un secreto: están en el código de la página. Lo que de verdad no
+  se pueda contar, no se pone.
+
+
+  LA LÍNEA DE TIEMPO
+
+  Los eventos importantes del mundo, en una línea vertical de lo más
+  antiguo (arriba) a lo más reciente (abajo), con las tarjetas a un lado
+  y a otro. Vive en sitio/wiki/linea-de-tiempo/linea_de_tiempo.html, cada evento tiene su
+  página (sitio/wiki/linea-de-tiempo/evento_<nombre>.html, igual que un artículo de la
+  wiki: su texto, una ficha con el año, el evento de antes y el de
+  después) y en la portada de la wiki sale una tarjeta con un dibujito,
+  debajo del mapamundi, y los eventos en el apartado «historia».
+
+  LA TARJETA DE LA PORTADA es la línea en pequeño, de arriba abajo y a
+  la misma escala, con texto: cada evento en un recuadrito con su año y
+  su nombre, que lleva a su página, y cada era con su rótulo, que lleva
+  a su sitio en la línea grande. La pinta sitio/wiki/scripts/paginas/mundo.js con
+  lo que escribe el generador en el campo "mini" de la ficha de la línea
+  (sitio/wiki/datos/mundo.json). Si dos recuadros se pisarían (eventos muy
+  cerca en el tiempo, o un nombre largo), el script baja lo de debajo lo
+  justo: el orden se mantiene y la escala solo se estira.
+
+  NO SALE DE CHRONICLER: sale de sitio/wiki/datos/linea-de-tiempo.json. Lo
+  cómodo es la herramienta (en el menú: Wiki Cralëa → Llevar la línea
+  de tiempo):
+
+      python herramientas/1-publicar/linea-de-tiempo.py
+
+  Cada evento lleva un nombre y un año (un número entero; antes del año
+  0, en negativo: -25500), y si quieres:
+
+      hasta                si dura varios años (una guerra), el año en que
+                           acaba. Sale «−11420 a −11380».
+      cómo se lee el año   si no es el número tal cual ("342 de la Era
+                           Nueva", "hacia el -12000"). El año sigue
+                           haciendo falta: es lo que ordena la línea.
+      resumen              una o dos frases para la tarjeta. Mejor por
+                           debajo de 180 letras.
+      texto                lo de su página, en el mismo Markdown que la
+                           wiki. Se escribe párrafo a párrafo, o se pega
+                           la ruta de un .md donde lo tengas.
+      imagen               la ruta de tu ordenador (se trae a
+                           sitio/wiki/imagenes/eventos/ en WebP) o el nombre de
+                           una que ya esté en sitio/wiki/imagenes/.
+
+  LAS ERAS son los trozos grandes de la historia, como nuestra Edad
+  Media o la Edad Contemporánea. Se llevan desde la misma herramienta
+  (opción «e. las eras») y cada una tiene un nombre, desde qué año y, si
+  quieres, hasta cuál y una frase que la cuente. Sin «hasta», una era
+  dura hasta que empieza la siguiente (y la última, hasta hoy); con
+  «hasta» antes de la siguiente, queda un hueco sin era y en la línea se
+  marca «aquí acaba…». Dos eras no se pueden pisar: si una empieza antes
+  de que acabe la anterior, la anterior se corta ahí y se avisa.
+
+  En la línea, cada era es una franja de fondo (un tono sí y otro menos)
+  que empieza con una raya de puntos y un rótulo con su nombre y sus
+  años, y los eventos que caen dentro son suyos: no hay que decírselo a
+  cada evento, se sabe por el año. En la página de cada evento sale su
+  era en la ficha, y en la portada, al lado del año. En el HTML, cada
+  era es un <section> con su <h2>, y los eventos pasan a <h3>.
+
+  EL CALENDARIO DE CRALËA. Los años se cuentan Antes (AEM) y Después
+  (DEM) de la Era Muda, y así se escriben en el JSON y así salen en la
+  web: "800.000.000 AEM", "-13.000 DEM", "753 DEM". Lo dice esto, al
+  principio de sitio/wiki/datos/linea-de-tiempo.json:
+
+      "calendario": {"antes": "AEM", "despues": "DEM"},
+      "hoy": "1340 DEM",
+
+  Lo que dura la Era Muda no se sabe (de 0 AEM a 0 DEM, y −13.000 DEM es
+  13.000 años antes de que acabe), así que la línea no lo mide: ese
+  tramo sale siempre cortado con su «≈» y «duración incierta». «hoy» es
+  donde acaba la línea (sale abajo, «hoy · 1340 DEM»), y la última era,
+  si no dice hasta cuándo, llega hasta ahí. En la herramienta, los años
+  se escriben igual: «14.000 AEM», «-13.000 DEM» (un número sin sigla es
+  DEM). Sin "calendario" en el JSON, los años son números a secas.
+
+  LAS ERAS PUEDEN LLEVAR SU COLOR ("color": "#0042ff"), y entonces su
+  franja es de ese color, en la línea y en la portada. Son los de tu
+  dibujo de la línea. El texto sigue con los colores del tema, que son
+  los que se leen bien en los diez.
+
+  SE ENLAZAN CON LA WIKI EN LOS DOS SENTIDOS. En el texto de un evento,
+  [[Valderín]] lleva a esa página de la wiki. Y en una página de la
+  wiki, [[La Gran Sequía]] lleva al evento, como si fuera una
+  página más. Los dos salen en el «se habla de esto en» del otro (con
+  la nota «evento»). Por eso generar-mundo.py rehace la línea cada vez
+  que pasa la wiki. Si cambias el NOMBRE de un evento, cambia también
+  los [[enlaces]] que lo nombren en las páginas de la wiki.
+
+  LA ESCALA. Los eventos se separan según los años que hay entre ellos,
+  pero comprimido: el hueco típico entre dos eventos (la mediana) se
+  pinta a unos 9 rem y los demás en proporción. Un hueco enorme, que a
+  escala serían metros de línea vacía, se CORTA: sale un «≈» en la línea
+  y cuántos años faltan. Y uno muy pequeño se estira lo justo para que
+  quepan las tarjetas. Las rayitas son años redondos (cada 1000, cada
+  50…, según la escala) y una de cada cinco lleva el año escrito, como
+  una regla. Los números están al principio de
+  herramientas/0-comun/mundo_linea.py (OBJETIVO, MINIMO, MAXIMO,
+  CORTE) por si un día quieres la línea más apretada o más suelta.
+
+  En el móvil (por debajo de 860 px) la línea se va a la izquierda y
+  todas las tarjetas a la derecha. Los estilos están en
+  sitio/wiki/estilos/paginas/mundo-linea.css y mundo-linea.responsive.css.
+
+  SIN EVENTOS NO SE PUBLICA NADA: ni la página ni la tarjeta de la
+  portada. Con el primero aparece todo. Quitar un evento quita su
+  página.

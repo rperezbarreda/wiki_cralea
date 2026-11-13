@@ -1,0 +1,12 @@
+# Lo que deja Python al importar las herramientas.
+__pycache__/
+*.pyc
+
+# Los programas que bajan las herramientas (el ampliador con IA de los
+# mapas): son de este ordenador, no de la wiki.
+herramientas/programas/
+
+# Basurilla de los sistemas operativos.
+.DS_Store
+Thumbs.db
+desktop.ini
