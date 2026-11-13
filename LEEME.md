@@ -15,6 +15,8 @@ Es un sitio estático hecho a mano (HTML, CSS y JavaScript, sin librerías ni he
 | `sitio/wiki/` | **Lo publicado**: las páginas generadas, el CSS, el JS, las imágenes y los datos. Todo cuelga de `/wiki/`, igual que en la web. |
 | `herramientas/` | Los scripts de Python que pasan las fuentes a la web y lo comprueban. Están explicados en `herramientas/LEEME.txt`. |
 
+Este repositorio **no lleva editor**. Las páginas se escriben a mano o con un editor que vive en una app aparte. Aquí solo están el contenido, la web y las herramientas que la generan.
+
 ## El formato de las páginas
 
 Cada página es un archivo Markdown, y el nombre del archivo es el título de la página (`Reino de Prunia.md`). Arriba lleva un *frontmatter* YAML con la ficha:

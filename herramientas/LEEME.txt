@@ -129,8 +129,10 @@
 ---------------------------------------------------------------
 
   Copiada de herramientas/LEEME.txt del blog (rperezbarreda/richiblog)
-  con las rutas cambiadas a las de aquí. Donde habla del editor
-  (editor-wiki.py), todavía no está en este repositorio.
+  con las rutas cambiadas a las de aquí. EL EDITOR (editor-wiki.py, la
+  web para escribir páginas y dibujar mapas) NO VA EN ESTE REPOSITORIO, a
+  propósito: la wiki se usa desde otros sitios y el editor va en su propia
+  app, aparte. Lo que se dice de él aquí abajo es de cómo funciona allí.
 
 
   EL MUNDO (la wiki)
